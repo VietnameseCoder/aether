@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHER | Mapping the Path of Traditions</title>
+    
+    <!-- Design Tokens & Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Caveat:wght@400..700&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js for 3D Models -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0A192F',     /* Deep Navy */
+                        deepDark: '#020c1b', /* Darker Navy */
+                        lightNavy: '#112240',/* Lighter Navy */
+                        forest: '#0f291e',   /* Deep Green */
+                        earth: '#2a231d',    /* Dark Earth/Brown */
+                        accent: '#FFFFFF',   /* Pure White */
+                        parchment: '#E6F1FF',/* Soft Blue-White */
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        hand: ['Caveat', 'cursive'],
+                        signature: ['Mrs Saint Delafield', 'cursive'],
+                    },
+                    animation: {
+                        'fog-flow': 'fogFlow 60s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fogFlow: {
+                            '0%': { backgroundPosition: '0 0' },
+                            '100%': { backgroundPosition: '100% 0' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styles & Custom Cursor */
+        body {
+            background-color: #0A192F;
+            color: #E6F1FF;
+            margin: 0;
+            padding: 0;
+            cursor: none;
+            overflow-x: hidden;
+            transition: background-color 1.2s ease;
+        }
+        
+        body.loading {
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Loading Screen */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #020c1b;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1.5s cubic-bezier(0.19, 1, 0.22, 1), visibility 1.5s;
+        }
+        #loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        .loader-bar-container {
+            width: 300px;
+            height: 2px;
+            background-color: rgba(255,255,255,0.1);
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .loader-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background-color: #FFFFFF;
+            transition: width 0.2s linear;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        #enter-button {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+            pointer-events: none;
+        }
+        #enter-button.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Main Cursor */
+        #custom-cursor {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10001; /* Higher than Loader */
+            mix-blend-mode: difference;
+            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1), width 0.3s, height 0.3s;
+            left: 0; 
+            top: 0;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Cursor Trail Elements */
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: rgba(230, 241, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000; /* Higher than Loader */
+            left: 0;
+            top: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+        }
+
+        body.hovering #custom-cursor {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        html.lenis { height: auto; }
+        .lenis-smooth { scroll-behavior: auto !important; }
+
+        .ghost-text span {
+            opacity: 0;
+            display: inline-block;
+            margin-right: 0.25em;
+            will-change: transform, opacity, filter;
+            transition: text-shadow 0.2s ease;
+        }
+
+        .parallax-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .parallax-img {
+            scale: 1.2;
+            transition: transform 0.1s linear;
+        }
+
+        /* Atmospheric Fog */
+        .fog-layer {
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 200%; 
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.4;
+            background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/img/fog1.png') repeat-x;
+            background-size: contain;
+            animation: fogFlow 120s linear infinite;
+        }
+        @keyframes fogFlow {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
+        }
+
+        .grain {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.04;
+            background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Noise_Texture.png");
+        }
+
+        section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .vertical-section {
+            min-height: 100vh;
+            padding: 10vw;
+        }
+
+        .artifact-card {
+            background: rgba(17, 34, 64, 0.6);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            transition: transform 0.4s ease, border-color 0.4s ease, background-color 0.4s ease;
+        }
+        .artifact-card:hover {
+            transform: translateY(-10px) rotate(0deg) !important;
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(23, 42, 69, 0.9);
+            z-index: 50;
+        }
+
+        .bar-container {
+            position: relative;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            width: 100%;
+            margin-top: 2rem;
+            overflow: visible;
+        }
+        .bar-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 100%;
+            background: #FFFFFF;
+            width: 0%; 
+        }
+        .stat-number { font-variant-numeric: tabular-nums; }
+
+        .social-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            overflow: hidden;
+        }
+        .social-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: white;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .social-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        .social-icon { transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+        .social-link:hover .social-icon { transform: rotate(360deg) scale(1.2); }
+
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+        .flip-front, .flip-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .flip-back {
+            color: white;
+            transform: rotateY(180deg);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 2px;
+            background-color: white;
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        
+        /* EXPANDABLE VALUE ITEM STYLES */
+        .value-item {
+            height: 120px; /* Collapsed Height */
+            border-left: 1px solid rgba(255,255,255,0.1);
+            padding-left: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            z-index: 20;
+            background: rgba(10, 25, 47, 0.4); 
+            backdrop-filter: blur(2px);
+            overflow: hidden;
+        }
+        .value-item:hover {
+            height: 220px; /* Expanded Height */
+            border-left-color: rgba(255,255,255,0.8);
+            background: rgba(17, 34, 64, 0.8);
+        }
+        
+        .value-desc {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease 0.1s;
+            display: block;
+        }
+        .value-item:hover .value-desc {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 3D Canvas Containers */
+        #hero-canvas, #values-canvas, #impact-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; 
+            pointer-events: none; 
+        }
+        
+        #artifact-canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* Sound Button */
+        .sound-btn {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 100;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+        }
+        .sound-btn:hover {
+            border-color: rgba(255,255,255,0.8);
+            transform: scale(1.1);
+        }
+        .sound-bar {
+            width: 2px;
+            height: 10px;
+            background: white;
+            margin: 0 1px;
+            animation: none;
+        }
+        .playing .sound-bar {
+            animation: equalizer 1s infinite ease-in-out;
+        }
+        .playing .sound-bar:nth-child(1) { animation-delay: 0.2s; }
+        .playing .sound-bar:nth-child(2) { animation-delay: 0.4s; }
+        .playing .sound-bar:nth-child(3) { animation-delay: 0.6s; }
+        .playing .sound-bar:nth-child(4) { animation-delay: 0.8s; }
+        
+        @keyframes equalizer {
+            0%, 100% { height: 10px; }
+            50% { height: 20px; }
+        }
+
+        /* New Immersive Layered Parallax */
+        .immersive-parallax {
+            position: relative;
+            height: 120vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .parallax-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%; /* Taller for movement */
+            background-size: cover;
+            background-position: center;
+            will-change: transform;
+        }
+        
+        /* Using generic nature images that layer well conceptually */
+        .layer-back {
+            /* Sky / Mountains */
+            background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=3270&auto=format&fit=crop'); 
+            z-index: 1;
+            transform: translateZ(0);
+        }
+        .layer-mid {
+            /* Mist / Hills */
+            background-image: url('https://png.pngtree.com/png-clipart/20220909/ourmid/pngtree-fog-png-image_6144078.png');
+            background-size: cover;
+            opacity: 0.8;
+            z-index: 2;
+        }
+        .layer-front {
+            /* Foreground elements - using a transparent PNG or CSS gradient to simulate depth if image fails */
+            background: linear-gradient(to top, #0A192F 10%, transparent 60%);
+            z-index: 3;
+        }
+
+        .immersive-text-overlay {
+            font-family: 'Playfair Display', serif;
+            font-size: 10vw;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            font-style: italic;
+            z-index: 4;
+            mix-blend-mode: overlay;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        /* Game Section Styles */
+        .game-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        
+        .game-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .game-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        .game-btn:hover::before {
+            left: 100%;
+        }
+
+    </style>
+</head>
+<body class="font-light selection:bg-white selection:text-dark loading">
+
+    <!-- AUDIO ELEMENT -->
+    <audio id="bg-music" loop>
+        <source src="https://files.catbox.moe/cs56o4.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- LOADING SCREEN -->
+    <div id="loader">
+        <div class="text-center relative z-20">
+            <h1 class="font-serif text-6xl italic text-white mb-6 animate-pulse">Aether</h1>
+            <div class="loader-bar-container mx-auto rounded-full">
+                <div class="loader-line"></div>
+            </div>
+            <div class="flex justify-between w-[300px] mx-auto mt-2">
+                 <p class="font-mono text-[10px] text-white/50 uppercase tracking-widest" id="loader-status">Initializing</p>
+                 <p class="font-mono text-[10px] text-white/50" id="loader-percent">0%</p>
+            </div>
+            
+            <!-- Enter Button -->
+            <button id="enter-button" class="mt-8 px-8 py-3 border border-white/20 rounded-full font-mono text-xs hover:bg-white hover:text-dark transition-all duration-500 uppercase tracking-[0.2em] hoverable">
+                Click to Enter
+            </button>
+        </div>
+        <!-- Loader BG -->
+        <div class="absolute inset-0 bg-black/80 z-10"></div>
+        <img src="https://images.unsplash.com/photo-1518066000714-58c45f1a2c0a?q=80&w=2070&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-20 grayscale z-0">
+    </div>
+
+    <!-- Sound Control -->
+    <div class="sound-btn hoverable" id="sound-toggle">
+        <div class="sound-bar"></div>
+        <div class="sound-bar"></div>
+        <div class="sound-bar"></div>
+        <div class="sound-bar"></div>
+    </div>
+
+    <!-- Custom Cursor System -->
+    <div id="custom-cursor"></div>
+    <div class="cursor-trail"></div>
+    <div class="cursor-trail"></div>
+    <div class="cursor-trail"></div>
+
+    <div class="grain"></div>
+    <div class="fog-layer"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full p-8 flex justify-between items-center z-50 font-mono text-xs uppercase tracking-widest bg-gradient-to-b from-deepDark/90 to-transparent backdrop-blur-[2px]">
+        <!-- Logo Image -->
+        <a href="#" class="block hoverable">
+            <img src="https://files.catbox.moe/kr9py2.png" alt="Aether Logo" class="h-12 w-auto opacity-90 hover:opacity-100 transition-opacity">
+        </a>
+        <div class="space-x-8">
+            <a href="#" class="hover:text-accent transition hoverable">Manifesto</a>
+            <a href="#journey" class="hover:text-accent transition hoverable">Journey</a>
+            <a href="#gallery" class="hover:text-accent transition hoverable">Gallery</a>
+            <a href="#game-experience" class="hover:text-accent transition hoverable">Experience</a>
+        </div>
+    </nav>
+
+    <!-- 01. HERO SECTION -->
+    <header class="h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-[#020c1b] to-[#0A192F]">
+        <!-- 3D Background -->
+        <div id="hero-canvas"></div>
+
+        <div class="z-10 text-center space-y-4 pointer-events-none relative">
+            <div class="font-mono text-accent text-sm tracking-[0.5em] uppercase mb-4" id="hero-sub">Mapping the Path</div>
+            <h1 class="font-serif text-6xl md:text-9xl italic text-white mix-blend-overlay" id="hero-title">Aether</h1>
+            <div class="mt-12 opacity-50 text-xs font-mono animate-bounce text-white">Scroll to Begin</div>
+        </div>
+        <!-- Hero Background Parallax Element -->
+        <div class="absolute inset-0 z-0 opacity-40">
+            <img src="https://statics.vinpearl.com/ha-long-bay-in-vietnam-1_1689180838.jpg" 
+                  class="w-full h-full object-cover parallax-img" data-speed="0.2" alt="Ha Long Bay Landscape">
+            <!-- Overlay to blend into next section -->
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-dark/20 to-dark"></div>
+        </div>
+    </header>
+
+    <!-- 02. MANIFESTO (Blend Dark -> Forest) -->
+    <section class="manifesto-section bg-[#0A192F] vertical-section relative overflow-hidden">
+        <!-- Ambient Green Light -->
+        <div class="absolute top-1/2 left-0 w-[800px] h-[800px] bg-forest/30 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2"></div>
+
+        <div class="max-w-5xl relative z-10">
+            <div class="font-mono text-accent text-xs mb-8 opacity-60">01 — Manifesto</div>
+            <!-- Improved Text Structure for Animation -->
+            <h2 class="ghost-text font-serif text-4xl md:text-6xl leading-tight text-parchment cursor-default">
+                Our journey began with a simple belief: that cultures are living treasures, and once lost, they can never truly be replaced. In a world moving faster than ever, many indigenous and lesser-known communities are fading into silence not because they lack value, but because they lack visibility. On these values as foundation, we documented cultures into high quality videos.
+            </h2>
+        </div>
+    </section>
+
+    <!-- NEW MULTI-LAYER PARALLAX SECTION -->
+    <section class="immersive-parallax bg-[#0A192F]">
+        <div class="parallax-layer layer-back" data-speed="0.1"></div>
+        <div class="parallax-layer layer-mid" data-speed="0.3"></div>
+        <div class="parallax-layer layer-front" data-speed="0.6"></div>
+        
+        <h2 class="immersive-text-overlay" data-speed="0.4">Exploring<br>Cultures</h2>
+    </section>
+
+    <!-- 03. PINNED SECTION (Blend Forest -> Earth) -->
+    <section class="pinned-section vertical-section relative flex-row items-start space-x-20 overflow-visible bg-gradient-to-b from-[#0A192F] to-[#1a2e25]" id="journey">
+        <div class="w-1/2 sticky top-10 h-[90vh] parallax-container shadow-2xl border border-white/10 hoverable">
+            <img src="https://images.pexels.com/photos/3560366/pexels-photo-3560366.jpeg?cs=srgb&dl=pexels-matthardy-3560366.jpg&fm=jpg" 
+                  class="w-full h-full object-cover" alt="Sustainable Van">
+            <div class="absolute bottom-10 left-10 font-mono text-xs bg-deepDark/90 text-white p-4 border border-white/20 backdrop-blur-md">
+                The Camper Van
+            </div>
+        </div>
+        <div class="w-1/2 pt-[20vh] space-y-[80vh] pb-[60vh]">
+            <div class="space-y-6 chapter">
+                <h3 class="font-serif text-5xl italic text-white">Conservation</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-sm uppercase tracking-wide max-w-md">
+                    Documenting stories isn't enough. We build living archives that local communities can use to teach the next generation.
+                </p>
+            </div>
+            <div class="space-y-6 chapter">
+                <h3 class="font-serif text-5xl italic text-white">Exploration</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-sm uppercase tracking-wide max-w-md">
+                    Curiosity is our fuel. We travel into the remote corners of the world to find the sparks of culture that remain.
+                </p>
+            </div>
+            <div class="space-y-6 chapter">
+                <h3 class="font-serif text-5xl italic text-white">Sustainability</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-sm uppercase tracking-wide max-w-md">
+                    The path must be light. Our journey respects the land and the people, leaving behind only inspiration.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 04. ARTIFACTS (Earth Tones) -->
+    <section id="artifacts" class="h-[250vh] relative bg-[#1a2e25]">
+        <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+            <!-- Background Blend -->
+            <div class="absolute inset-0 bg-gradient-to-br from-[#1a2e25] to-[#2a231d] opacity-50"></div>
+            
+            <div class="zoom-container w-full h-full relative flex items-center justify-center">
+                
+                <!-- 3D Artifact Canvas -->
+                <div id="artifact-canvas"></div>
+
+                <div class="relative z-10 text-center">
+                    <div class="w-[40vw] h-[40vw] rounded-full border border-white/10 flex items-center justify-center backdrop-blur-sm bg-white/5 shadow-2xl">
+                         <h2 class="font-serif text-6xl italic text-white">Uncovering<br>History</h2>
+                    </div>
+                </div>
+
+                <!-- 1. Top Left: Ancient Textiles -->
+                <div class="absolute top-[15%] left-[10%] artifact-card p-6 w-64 rounded-sm transform -rotate-6 z-0 hoverable">
+                    <div class="h-32 bg-gray-800 mb-4 overflow-hidden">
+                        <img src="https://embroideryviet.com/wp-content/uploads/2017/10/Ethnic-travel-Lao-Lu-textiles-Vietnam.jpg" class="w-full h-full object-cover opacity-80">
+                    </div>
+                    <p class="font-serif italic text-lg">Ancient Textiles</p>
+                </div>
+
+                <!-- 2. Top Right: Highland Mist -->
+                <div class="absolute top-[15%] right-[10%] artifact-card p-5 w-52 rounded-sm transform rotate-6 z-10 hoverable">
+                    <div class="h-36 bg-gray-800 mb-4 overflow-hidden">
+                        <img src="https://files.catbox.moe/tgwkuc.jpg" class="w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-110">
+                    </div>
+                    <div class="font-mono text-[10px] text-accent uppercase tracking-widest mb-2">Ref 012</div>
+                    <p class="font-serif italic text-base">Highland Mist</p>
+                </div>
+
+                <!-- 3. Bottom Left: Phan Signature -->
+                <div class="absolute bottom-[20%] left-[15%] z-20 transform -rotate-6 hoverable mix-blend-screen">
+                    <span class="font-signature text-7xl md:text-9xl text-blue-300 opacity-90" style="filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.4));">Phan</span>
+                </div>
+
+                <!-- 4. Bottom Right: Chi Signature -->
+                <div class="absolute bottom-[20%] right-[15%] z-20 transform rotate-3 hoverable mix-blend-screen">
+                     <span class="font-signature text-7xl md:text-9xl text-blue-300 opacity-90" style="filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.4));">Chi</span>
+                </div>
+            </div>
+             <div class="absolute bottom-10 w-full text-center z-30 opacity-0 zoom-caption">
+                <span class="font-mono text-xs uppercase tracking-[0.3em] text-white/50">Digging Deeper into the Archives</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 05. GALLERY (Earth -> Navy transition) -->
+    <section class="horizontal-outer overflow-hidden bg-gradient-to-r from-[#2a231d] to-[#0A192F] relative h-screen flex flex-col justify-center border-t border-white/5" id="gallery">
+        
+        <svg class="absolute top-0 left-0 w-[400vw] h-full pointer-events-none z-0 opacity-20" xmlns="http://www.w3.org/2000/svg">
+             <path d="M0,500 Q400,200 800,500 T1600,500 T2400,200 T3200,500" fill="none" stroke="white" stroke-width="1" />
+             <path d="M0,300 Q300,600 900,300 T1800,300 T2700,600" fill="none" stroke="white" stroke-width="0.5" stroke-dasharray="10,10" />
+        </svg>
+
+        <div class="horizontal-track flex h-full relative w-[350vw] items-center">
+            
+            <div class="absolute left-[5vw] top-[20vh] w-[30vw] space-y-8 z-10">
+                <div class="font-mono text-accent text-xs">03 — Field Notes</div>
+                <h2 class="font-serif text-5xl md:text-7xl italic leading-tight text-white">
+                    Abstract <br> Memory
+                </h2>
+                <p class="font-mono text-xs text-parchment/60 leading-relaxed max-sm sm:max-w-sm">
+                    A non-linear map of human experience. Following the invisible threads that connect us all.
+                </p>
+            </div>
+
+            <div class="absolute left-[50vw] top-[10vh] w-[25vw] h-[35vh] group hover:z-20 transition-all duration-500 hoverable">
+                <img src="https://madebygaia.vn/cdn/shop/articles/vietnamese-silk-villages.jpg?v=1730134779" 
+                      class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out border border-white/10 p-2 bg-white/5">
+                <div class="font-mono text-[10px] text-white/50 mt-2 text-right">Silk Weavers</div>
+            </div>
+
+            <div class="absolute left-[90vw] bottom-[15vh] w-[30vw] h-[45vh] group hover:z-20 transition-all duration-500 hoverable">
+                <img src="https://cdn2.tuoitre.vn/thumb_w/1200/tto/i/s626/2017/11/16/c3a9eccb.jpg" 
+                      class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out border border-white/10 p-2 bg-white/5">
+                <div class="font-mono text-[10px] text-white/50 mt-2">Local Songs</div>
+            </div>
+
+            <div class="absolute left-[140vw] top-[15vh] w-[20vw] h-[20vw] rounded-full overflow-hidden group hover:z-20 border border-white/10 bg-white/5 p-1 hoverable">
+                 <img src="https://travelsense.asia/wp-content/uploads/2014/02/buddha-pagoda-vietnam.jpg" 
+                      class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out">
+            </div>
+             <div class="absolute left-[150vw] top-[40vh] font-mono text-[10px] text-white/50">Pagodas</div>
+
+            <div class="absolute left-[200vw] top-[25vh] w-[35vw] h-[55vh] group hover:z-20 transition-all duration-500 hoverable">
+                <img src="https://vpt-en.b-cdn.net/wp-content/uploads/s/06/sapa-ta-van.jpg.webp" 
+                      class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out border border-white/10 p-2 bg-white/5">
+                <div class="font-mono text-[10px] text-white/50 mt-2 text-right">Cultural Minorities</div>
+            </div>
+
+            <div class="absolute left-[260vw] top-[50vh] w-[20vw] border-l border-white/20 pl-4">
+                <p class="font-serif italic text-2xl text-white/80">"To map a culture is to map the stars. Everything is connected."</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- NEW VALUES TYPEWRITER SECTION -->
+    <section id="values-list" class="relative min-h-[150vh] bg-[#0A192F] py-32 flex flex-col items-center">
+        
+        <!-- 3D Canvas for Values -->
+        <div id="values-canvas"></div>
+
+        <!-- Background -->
+        <div class="absolute inset-0 z-0 pointer-events-none">
+             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSubIRulzd54wWhkW5arL9YQnSoC2Xo0IgLXw&s" 
+                   class="w-full h-full object-cover opacity-10 blur-sm" alt="Values Background">
+             <!-- Deep rich gradient overlay -->
+             <div class="absolute inset-0 bg-gradient-to-b from-[#0A192F] via-[#112240]/90 to-[#0A192F]"></div>
+        </div>
+
+        <!-- Handdrawn Connecting Line SVG -->
+        <svg class="absolute top-0 left-0 w-full h-full z-10 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <!-- Winding path that roughly zig-zags between the 2-column layout -->
+            <path id="values-connector" d="M 25 5 Q 50 10 75 20 T 25 35 T 75 50 T 25 65 T 75 80" 
+                  fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.5" stroke-dasharray="5,5" />
+        </svg>
+
+        <div class="relative z-20 w-full max-w-5xl px-8">
+            <div class="font-mono text-accent text-xs mb-20 opacity-60">04 — Core Principles</div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
+                
+                <!-- Value 1 -->
+                <div class="value-item group hoverable">
+                    <div class="flex items-center">
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Culture"></h3>
+                    </div>
+                    <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                        The heartbeat of a community, expressed through ritual and art. It defines who we are.
+                    </p>
+                </div>
+
+                <!-- Value 2 -->
+                <div class="value-item group hoverable md:mt-24">
+                     <div class="flex items-center">
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Preservation"></h3>
+                    </div>
+                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                        Safeguarding the intangible before it fades into silence. Every story matters.
+                    </p>
+                </div>
+
+                <!-- Value 3 -->
+                <div class="value-item group hoverable">
+                     <div class="flex items-center">
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Aether"></h3>
+                    </div>
+                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                        The space between the stars; the invisible connection binding us together.
+                    </p>
+                </div>
+
+                <!-- Value 4 -->
+                <div class="value-item group hoverable md:mt-24">
+                     <div class="flex items-center">
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="History"></h3>
+                    </div>
+                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                        Learning from the past to navigate the future. Wisdom is an inheritance.
+                    </p>
+                </div>
+
+                 <!-- Value 5 -->
+                <div class="value-item group hoverable">
+                     <div class="flex items-center">
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Future"></h3>
+                    </div>
+                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                        Building a bridge for the next generation to walk upon with pride.
+                    </p>
+                </div>
+
+                 <!-- Value 6 -->
+                <div class="value-item group hoverable md:mt-24">
+                     <div class="flex items-center">
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Nature"></h3>
+                    </div>
+                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                        Respecting the land that shapes the culture. We are stewards of the earth.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 06. FLIPPABLE VOICES SECTION (Updated) -->
+    <section id="voices" class="min-h-screen bg-gradient-to-b from-[#0A192F] to-[#112240] py-32 vertical-section">
+        <div class="max-w-6xl w-full mx-auto mb-32">
+            <div class="font-mono text-accent text-xs mb-12 opacity-60">05 — The Voices</div>
+            
+            <!-- Grid reduced to 2 columns for impact -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
+                
+                <!-- Flip Card 1: Ngoc Phan -->
+                <div class="flip-card h-[80vh] w-full group hoverable">
+                    <div class="flip-inner relative w-full h-full transition-transform duration-700">
+                        <!-- Front -->
+                        <div class="flip-front absolute w-full h-full bg-[#0A192F] border border-white/10 overflow-hidden">
+                            <img src="https://files.catbox.moe/7tmr8n.png" 
+                                 onerror="this.src='https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop'"
+                                 class="w-full h-full object-cover transition-all duration-700 grayscale group-hover:grayscale-0" alt="Ngoc Phan">
+                            <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-dark to-transparent">
+                                 <h3 class="font-serif text-4xl italic text-white">Ngoc Phan</h3>
+                                 <p class="font-mono text-xs text-parchment/50 mt-2 uppercase tracking-widest flex items-center">
+                                    Click to Reveal Story <span class="ml-2 text-lg">↻</span>
+                                 </p>
+                            </div>
+                        </div>
+                        <!-- Back -->
+                        <div class="flip-back absolute w-full h-full bg-[#1a2e25] border border-white/10 p-12 flex flex-col justify-center items-start text-left">
+                            <h4 class="font-serif text-3xl italic text-white mb-6">"To archive is to remember who we are."</h4>
+                            <p class="font-mono text-sm text-parchment/80 leading-relaxed mb-8">
+                                Growing up in the rapidly modernizing streets of Hanoi, Ngoc felt a disconnect from his heritage. He turned to archival work not just to organize history, but to find his own roots—bridging the gap between ancient traditions and the digital age.
+                            </p>
+                            <div class="w-full h-[1px] bg-white/20 mb-8"></div>
+                            <div class="grid grid-cols-2 gap-4 w-full">
+                                <div>
+                                    <div class="font-mono text-[10px] text-white/40 uppercase">Location</div>
+                                    <div class="font-serif text-lg text-white">Hanoi, Vietnam</div>
+                                </div>
+                                <div>
+                                    <div class="font-mono text-[10px] text-white/40 uppercase">Focus</div>
+                                    <div class="font-serif text-lg text-white">Cultural Archival</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flip Card 2: Diep Chi -->
+                <div class="flip-card h-[80vh] w-full group mt-24 md:mt-0 hoverable">
+                    <div class="flip-inner relative w-full h-full transition-transform duration-700">
+                        <!-- Front -->
+                        <div class="flip-front absolute w-full h-full bg-[#0A192F] border border-white/10 overflow-hidden">
+                            <img src="https://files.catbox.moe/152nts.png" 
+                                 onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop'"
+                                 class="w-full h-full object-cover transition-all duration-700 grayscale group-hover:grayscale-0" alt="Diep Chi">
+                            <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-dark to-transparent">
+                                 <h3 class="font-serif text-4xl italic text-white">Diep Chi</h3>
+                                 <p class="font-mono text-xs text-parchment/50 mt-2 uppercase tracking-widest flex items-center">
+                                    Click to Reveal Story <span class="ml-2 text-lg">↻</span>
+                                 </p>
+                            </div>
+                        </div>
+                        <!-- Back -->
+                        <div class="flip-back absolute w-full h-full bg-[#3d2b1f] border border-white/10 p-12 flex flex-col justify-center items-start text-left">
+                            <h4 class="font-serif text-3xl italic text-white mb-6">"Art is the memory of the land."</h4>
+                            <p class="font-mono text-sm text-parchment/80 leading-relaxed mb-8">
+                                Born amidst the endless rice paddies of the South, Diep Chi found beauty in the everyday. Her art evolved from childhood sketches in the mud to sophisticated visual storytelling, capturing the vibrant soul of the Mekong Delta.
+                            </p>
+                            <div class="w-full h-[1px] bg-white/20 mb-8"></div>
+                            <div class="grid grid-cols-2 gap-4 w-full">
+                                <div>
+                                    <div class="font-mono text-[10px] text-white/40 uppercase">Location</div>
+                                    <div class="font-serif text-lg text-white">Southern Vietnam</div>
+                                </div>
+                                <div>
+                                    <div class="font-mono text-[10px] text-white/40 uppercase">Focus</div>
+                                    <div class="font-serif text-lg text-white">Visual Arts</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 06. IMPACT (Updated with 3D Globe) -->
+    <section id="impact" class="relative min-h-screen bg-[#112240] py-32 vertical-section overflow-hidden">
+        <!-- 3D Canvas -->
+        <div id="impact-canvas"></div>
+
+        <div class="max-w-5xl w-full mx-auto relative z-10">
+             <div class="font-mono text-accent text-xs mb-12 opacity-60">06 — Our Impact</div>
+             
+             <div class="impact-graph mb-16 backdrop-blur-md bg-[#0A192F]/50 p-6 rounded-lg border border-white/5">
+                 <div class="flex justify-between items-end font-serif text-xl md:text-3xl text-white">
+                     <span class="max-w-xs md:max-w-none">Vietnamese Ethnic Groups to be Documented</span>
+                     <span class="stat-number text-white" data-target="54">0</span>
+                 </div>
+                 <div class="bar-container">
+                     <div class="bar-fill" data-width="54%"></div>
+                 </div>
+             </div>
+
+             <div class="impact-graph mb-16 backdrop-blur-md bg-[#0A192F]/50 p-6 rounded-lg border border-white/5">
+                 <div class="flex justify-between items-end font-serif text-xl md:text-3xl text-white">
+                     <span>Content to be spread and delivered</span>
+                     <span class="stat-number text-white" data-target="100" data-suffix="%">0</span>
+                 </div>
+                 <div class="bar-container">
+                     <div class="bar-fill" data-width="100%"></div>
+                 </div>
+             </div>
+
+             <div class="impact-graph backdrop-blur-md bg-[#0A192F]/50 p-6 rounded-lg border border-white/5">
+                 <div class="flex justify-between items-end font-serif text-xl md:text-3xl text-white">
+                     <span class="max-w-xl">Passion and Effort Dedicated to Preserving Cultures and Traditions</span>
+                     <span class="stat-number text-white" data-target="Infinite">Infinite</span>
+                 </div>
+                 <div class="bar-container">
+                     <div class="bar-fill" data-width="100%"></div>
+                 </div>
+             </div>
+        </div>
+    </section>
+
+    <!-- 07. NEW INTERACTIVE EXPERIENCE SECTION -->
+    <section id="game-experience" class="min-h-screen bg-gradient-to-t from-[#020c1b] to-[#112240] flex items-center justify-center relative overflow-hidden">
+        
+        <!-- Animated Grid Background -->
+        <div class="absolute inset-0 z-0" style="background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; opacity: 0.1;"></div>
+        
+        <div class="max-w-6xl w-full px-8 relative z-10 flex flex-col md:flex-row items-center gap-20">
+            
+            <!-- Left Text Content -->
+            <div class="md:w-1/2 space-y-8 game-content opacity-0 translate-y-20">
+                <div class="font-mono text-accent text-xs opacity-60 uppercase tracking-widest">07 — Interactive Experience</div>
+                <h2 class="font-serif text-5xl md:text-7xl italic text-white leading-tight">
+                    Discover Vietnam <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-white">Through Play</span>
+                </h2>
+                <p class="font-mono text-sm text-parchment/70 leading-relaxed">
+                    Immerse yourself in the "Aether Experience" — a digital journey where you uncover hidden cultures, collect rare artifacts, and unlock the essence of Vietnamese destinations through engaging mini-games.
+                </p>
+                
+                <a href="https://aethertravel.netlify.app/" target="_blank" class="game-btn inline-block mt-8 px-10 py-4 border border-white/30 text-white font-mono text-sm uppercase tracking-widest hover:bg-white hover:text-dark transition-all duration-500 hoverable">
+                    Enter the Simulation
+                </a>
+            </div>
+
+            <!-- Right Visual Card -->
+            <div class="md:w-1/2 game-visual opacity-0 translate-y-20">
+                <div class="game-card w-full aspect-square rounded-2xl p-2 relative group hoverable">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                    <div class="w-full h-full rounded-xl overflow-hidden relative border border-white/10">
+                        <img src="https://files.catbox.moe/2o7gco.png" 
+                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Game Preview">
+                        
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark via-transparent to-transparent opacity-80"></div>
+                        
+                        <div class="absolute bottom-8 left-8">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                <span class="font-mono text-[10px] text-green-400 uppercase">Live Demo</span>
+                            </div>
+                            <h3 class="font-serif text-3xl italic text-white">The Aether Quest</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- 08. SOCIAL MEDIA & FOOTER -->
+    <section id="socials" class="min-h-[80vh] bg-[#020c1b] relative flex flex-col justify-center items-center border-t border-white/10 overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center pointer-events-none opacity-[0.03]">
+             <h1 class="text-[20vw] font-serif italic text-white leading-none">Connect</h1>
+        </div>
+
+        <div class="z-10 w-full max-w-4xl px-8">
+            <div class="font-mono text-accent text-xs mb-12 opacity-60 text-center uppercase tracking-widest">Join the Community</div>
+            <div class="flex flex-col items-center space-y-6">
+                <!-- Social Links -->
+                <a href="https://www.instagram.com/aether.co.39?igsh=c3Joemc3cjk4cHA0" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
+                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">Instagram</span>
+                    <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                </a>
+                <a href="https://www.tiktok.com/@aethertravelco39" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
+                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">TikTok</span>
+                    <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>
+                </a>
+                 <a href="https://www.facebook.com/share/14X8pTjszfm/?mibextid=wwXIfr" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
+                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">Facebook</span>
+                    <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                </a>
+                <a href="https://www.youtube.com/@aether.co.39" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
+                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">YouTube</span>
+                    <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
+                </a>
+                <a href="https://x.com/39Aether" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
+                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">X / Twitter</span>
+                    <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M4 4l11.733 16h4.267l-11.733 -16z"></path><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path></svg>
+                </a>
+            </div>
+            <div class="mt-20 text-center opacity-30 font-mono text-[10px]">Aether © 2026. All rights reserved. <br> Designed for Preservation.</div>
+        </div>
+    </section>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+
+    <script>
+        window.onload = () => {
+            // ROBUST LOADER & AUDIO LOGIC
+            const loader = document.getElementById('loader');
+            const loaderLine = document.querySelector('.loader-line');
+            const loaderStatus = document.getElementById('loader-status');
+            const loaderPercent = document.getElementById('loader-percent');
+            const enterButton = document.getElementById('enter-button');
+            const bgMusic = document.getElementById('bg-music');
+            const soundBtn = document.getElementById('sound-toggle');
+
+            // CURSOR INITIALIZATION (Immediately active on Loader)
+            const cursor = document.getElementById('custom-cursor');
+            const trails = document.querySelectorAll('.cursor-trail');
+            
+            document.addEventListener('mousemove', (e) => {
+                gsap.to(cursor, { 
+                    x: e.clientX, 
+                    y: e.clientY, 
+                    duration: 0.1 
+                });
+                trails.forEach((trail, index) => {
+                    gsap.to(trail, {
+                        x: e.clientX,
+                        y: e.clientY,
+                        duration: 0.2 + (index * 0.1), 
+                        ease: "power2.out"
+                    });
+                });
+            });
+
+            // HOVER EFFECTS INITIALIZATION
+            const applyHoverEffects = () => {
+                const hoverables = document.querySelectorAll('.hoverable, a, button');
+                hoverables.forEach(el => {
+                    el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+                    el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+                });
+            };
+            applyHoverEffects();
+            
+            // Set initial volume
+            bgMusic.volume = 0.5;
+
+            // Toggle Sound
+            soundBtn.addEventListener('click', () => {
+                if (bgMusic.paused) {
+                    bgMusic.play().then(() => {
+                        soundBtn.classList.add('playing');
+                    }).catch(e => {
+                        console.log("Playback prevented:", e);
+                        soundBtn.classList.remove('playing');
+                    });
+                } else {
+                    bgMusic.pause();
+                    soundBtn.classList.remove('playing');
+                }
+            });
+
+            // Enter Site
+            enterButton.addEventListener('click', () => {
+                loader.classList.add('hidden');
+                document.body.classList.remove('loading');
+                initSiteAnimations();
+                
+                // Play Audio
+                bgMusic.play().then(() => {
+                    soundBtn.classList.add('playing');
+                }).catch(err => {
+                    console.log("Audio autoplay prevented or interrupted", err);
+                    soundBtn.classList.remove('playing');
+                });
+            });
+            
+            let progress = 0;
+            const messages = ["Initializing Core", "Decrypting Archives", "Loading 3D Assets", "Mapping Traditions", "Awaiting Input"];
+            
+            // Simulation intervals
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 5) + 1;
+                if (progress > 100) progress = 100;
+                
+                loaderLine.style.width = progress + '%';
+                loaderPercent.innerText = progress + '%';
+                
+                if (progress < 30) loaderStatus.innerText = messages[0];
+                else if (progress < 50) loaderStatus.innerText = messages[1];
+                else if (progress < 80) loaderStatus.innerText = messages[2];
+                else if (progress < 99) loaderStatus.innerText = messages[3];
+                else loaderStatus.innerText = messages[4];
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    enterButton.classList.add('visible'); // Show enter button
+                    // Re-apply hover effects to catch the newly visible enter button
+                    applyHoverEffects();
+                }
+            }, 50); // Slightly faster load
+
+            // THREE.JS LOGIC
+            initThreeJS();
+        };
+
+        function initThreeJS() {
+            // 1. HERO CANVAS: Particle Sphere
+            const heroContainer = document.getElementById('hero-canvas');
+            const heroScene = new THREE.Scene();
+            const heroCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            heroCamera.position.z = 2.5;
+
+            const heroRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            heroRenderer.setSize(window.innerWidth, window.innerHeight);
+            heroContainer.appendChild(heroRenderer.domElement);
+
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 1200;
+            const posArray = new Float32Array(particlesCount * 3);
+
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 6; 
+            }
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.008,
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            heroScene.add(particlesMesh);
+
+            // 2. ARTIFACT CANVAS: Icosahedron
+            const artifactContainer = document.getElementById('artifact-canvas');
+            const artifactScene = new THREE.Scene();
+            const artifactCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            artifactCamera.position.z = 3;
+
+            const artifactRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            artifactRenderer.setSize(window.innerWidth, window.innerHeight);
+            artifactContainer.appendChild(artifactRenderer.domElement);
+
+            const geometry = new THREE.IcosahedronGeometry(1.2, 0);
+            const wireframe = new THREE.WireframeGeometry(geometry);
+            const line = new THREE.LineSegments(wireframe);
+            line.material.depthTest = false;
+            line.material.opacity = 0.15;
+            line.material.transparent = true;
+            line.material.color = new THREE.Color(0xFFFFFF);
+            artifactScene.add(line);
+            
+            // 3. VALUES CANVAS: Floating Shards
+            const valuesContainer = document.getElementById('values-canvas');
+            const valuesScene = new THREE.Scene();
+            const valuesCamera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            valuesCamera.position.z = 10;
+            
+            const valuesRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            valuesRenderer.setSize(window.innerWidth, window.innerHeight);
+            valuesContainer.appendChild(valuesRenderer.domElement);
+            
+            // Create scattered small shapes
+            const shards = [];
+            const shardCount = 15;
+            
+            for (let i = 0; i < shardCount; i++) {
+                const size = (Math.random() * 0.3) + 0.1;
+                const shardGeo = new THREE.TetrahedronGeometry(size);
+                const shardMat = new THREE.MeshBasicMaterial({ 
+                    color: 0x88ccff, 
+                    wireframe: true, 
+                    transparent: true, 
+                    opacity: 0.3 
+                });
+                const shard = new THREE.Mesh(shardGeo, shardMat);
+                
+                shard.position.x = (Math.random() - 0.5) * 15;
+                shard.position.y = (Math.random() - 0.5) * 20; 
+                shard.position.z = (Math.random() - 0.5) * 5;
+                
+                shard.userData = {
+                    rotX: (Math.random() - 0.5) * 0.02,
+                    rotY: (Math.random() - 0.5) * 0.02
+                };
+                
+                valuesScene.add(shard);
+                shards.push(shard);
+            }
+            
+            // 4. IMPACT CANVAS: 3D Data Globe
+            const impactContainer = document.getElementById('impact-canvas');
+            const impactScene = new THREE.Scene();
+            const impactCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            impactCamera.position.z = 2.5;
+
+            const impactRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            impactRenderer.setSize(window.innerWidth, window.innerHeight);
+            impactContainer.appendChild(impactRenderer.domElement);
+            
+            // Creating a "Data Globe" using points
+            const globeGeo = new THREE.SphereGeometry(1.2, 64, 64);
+            const globeMat = new THREE.PointsMaterial({
+                size: 0.005,
+                color: 0x4fc3f7, // Light blue data color
+                transparent: true,
+                opacity: 0.4
+            });
+            const globePoints = new THREE.Points(globeGeo, globeMat);
+            impactScene.add(globePoints);
+            
+            // Add "Connection Lines" roughly wrapping sphere
+            const connectionGeo = new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.3, 1));
+            const connectionMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.05 });
+            const connections = new THREE.LineSegments(connectionGeo, connectionMat);
+            impactScene.add(connections);
+
+
+            // ANIMATION LOOP
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetX = 0;
+            let targetY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX);
+                mouseY = (event.clientY - windowHalfY);
+            });
+
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsedTime = clock.getElapsedTime();
+
+                // Hero Animation
+                targetX = mouseX * 0.001;
+                targetY = mouseY * 0.001;
+
+                particlesMesh.rotation.y += 0.05 * (targetX - particlesMesh.rotation.y);
+                particlesMesh.rotation.x += 0.05 * (targetY - particlesMesh.rotation.x);
+                particlesMesh.rotation.z += 0.001; 
+
+                // Artifact Animation
+                line.rotation.x += 0.002;
+                line.rotation.y += 0.003;
+                line.position.y = Math.sin(elapsedTime * 0.5) * 0.1;
+                
+                // Values Animation
+                shards.forEach(shard => {
+                    shard.rotation.x += shard.userData.rotX;
+                    shard.rotation.y += shard.userData.rotY;
+                    shard.position.y += Math.sin(elapsedTime + shard.position.x) * 0.005;
+                    shard.position.x += (mouseX * 0.0001 - shard.position.x * 0.01) * 0.1;
+                });
+                
+                // Impact Globe Animation
+                globePoints.rotation.y += 0.002;
+                connections.rotation.y -= 0.001;
+                globePoints.rotation.x = Math.sin(elapsedTime * 0.2) * 0.1;
+
+                heroRenderer.render(heroScene, heroCamera);
+                artifactRenderer.render(artifactScene, artifactCamera);
+                valuesRenderer.render(valuesScene, valuesCamera);
+                impactRenderer.render(impactScene, impactCamera);
+            }
+            animate();
+
+            // Resize Handler
+            window.addEventListener('resize', () => {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
+                
+                heroCamera.aspect = width / height;
+                heroCamera.updateProjectionMatrix();
+                heroRenderer.setSize(width, height);
+
+                artifactCamera.aspect = width / height;
+                artifactCamera.updateProjectionMatrix();
+                artifactRenderer.setSize(width, height);
+                
+                valuesCamera.aspect = width / height;
+                valuesCamera.updateProjectionMatrix();
+                valuesRenderer.setSize(width, height);
+                
+                impactCamera.aspect = width / height;
+                impactCamera.updateProjectionMatrix();
+                impactRenderer.setSize(width, height);
+            });
+        }
+
+        function initSiteAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            const lenis = new Lenis({ duration: 1.2, smoothWheel: true });
+            function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
+            requestAnimationFrame(raf);
+
+            gsap.from("#hero-title", { opacity: 0, y: 100, duration: 2, ease: "expo.out", delay: 0.5 });
+            gsap.from("#hero-sub", { opacity: 0, letterSpacing: "0em", duration: 2, ease: "expo.out", delay: 0.8 });
+            
+            const ghostText = document.querySelector('.ghost-text');
+            const words = ghostText.innerText.split(' ');
+            ghostText.innerHTML = words.map(word => `<span>${word}</span>`).join(' ');
+            
+            gsap.fromTo('.ghost-text span', 
+                { opacity: 0, filter: "blur(8px)", y: 20 },
+                {
+                    opacity: 1, filter: "blur(0px)", y: 0, color: '#FFFFFF',
+                    stagger: 0.05,
+                    duration: 1,
+                    scrollTrigger: { trigger: '.manifesto-section', start: 'top 70%', end: 'bottom 40%', scrub: 1 }
+                }
+            );
+
+            const manifestoSection = document.querySelector('.manifesto-section');
+            manifestoSection.addEventListener('mousemove', (e) => {
+                const spans = document.querySelectorAll('.ghost-text span');
+                spans.forEach(span => {
+                    const rect = span.getBoundingClientRect();
+                    const distance = Math.hypot(
+                        e.clientX - (rect.left + rect.width / 2),
+                        e.clientY - (rect.top + rect.height / 2)
+                    );
+                    
+                    if (distance < 120) {
+                         const intensity = 1 - (distance / 120);
+                         span.style.textShadow = `0 0 ${intensity * 15}px rgba(255,255,255, ${intensity * 0.8})`;
+                         span.style.color = '#FFFFFF';
+                    } else {
+                         span.style.textShadow = 'none';
+                    }
+                });
+            });
+
+            gsap.to(".parallax-img", {
+                scrollTrigger: { trigger: "header", start: "top top", end: "bottom top", scrub: true },
+                y: 150, ease: "none"
+            });
+            gsap.utils.toArray('.chapter').forEach(chapter => {
+                gsap.from(chapter, {
+                    scrollTrigger: { trigger: chapter, start: "top 80%", end: "top 40%", scrub: true },
+                    opacity: 0, x: 50
+                });
+            });
+
+            gsap.fromTo(".zoom-container", { scale: 2 }, {
+                scale: 1,
+                scrollTrigger: { trigger: "#artifacts", start: "top top", end: "bottom bottom", scrub: true }
+            });
+            gsap.to(".zoom-caption", {
+                scrollTrigger: { trigger: "#artifacts", start: "70% center", end: "90% center", scrub: true },
+                opacity: 1
+            });
+
+            const track = document.querySelector('.horizontal-track');
+            function getScrollAmount() { return -(track.scrollWidth - window.innerWidth); }
+            ScrollTrigger.create({
+                trigger: ".horizontal-outer",
+                start: "top top",
+                end: () => `+=${getScrollAmount() * -1.5}`,
+                pin: true,
+                animation: gsap.to(track, { x: getScrollAmount, ease: "none" }),
+                scrub: 1,
+                invalidateOnRefresh: true
+            });
+
+            const connector = document.getElementById('values-connector');
+            const length = connector.getTotalLength();
+            
+            connector.style.strokeDasharray = length;
+            connector.style.strokeDashoffset = length;
+
+            gsap.to(connector.style, {
+                strokeDashoffset: 0,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#values-list",
+                    start: "top center",
+                    end: "bottom center",
+                    scrub: 1
+                }
+            });
+
+            const typewriters = document.querySelectorAll('.typewriter-text');
+            
+            typewriters.forEach((el, index) => {
+                const text = el.getAttribute('data-text');
+                el.innerText = ''; 
+                
+                const cursorSpan = document.createElement('span');
+                cursorSpan.className = 'typewriter-cursor';
+                el.parentNode.appendChild(cursorSpan);
+
+                ScrollTrigger.create({
+                    trigger: el,
+                    start: "top 80%",
+                    once: true, 
+                    onEnter: () => {
+                        let i = 0;
+                        el.style.opacity = 1;
+                        
+                        const typing = setInterval(() => {
+                            if (i < text.length) {
+                                el.innerText += text.charAt(i);
+                                i++;
+                            } else {
+                                clearInterval(typing);
+                                setTimeout(() => cursorSpan.style.display = 'none', 1000);
+                            }
+                        }, 100); 
+                    }
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                ScrollTrigger.refresh();
+            });
+
+            document.querySelectorAll('.flip-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+            });
+
+            gsap.from(".flip-card", {
+                scrollTrigger: {
+                    trigger: "#voices",
+                    start: "top 70%", 
+                    end: "bottom 80%",
+                },
+                y: 100,
+                opacity: 0,
+                duration: 1.2,
+                stagger: 0.3,
+                ease: "power3.out"
+            });
+
+            gsap.from(".social-link", {
+                scrollTrigger: { trigger: "#socials", start: "top 70%" },
+                x: -50, // Slight slide in from left
+                opacity: 0, 
+                duration: 1, 
+                stagger: 0.15, 
+                ease: "power2.out"
+            });
+            
+            const bars = document.querySelectorAll('.impact-graph');
+            bars.forEach(graph => {
+                const fill = graph.querySelector('.bar-fill');
+                const targetWidth = fill.getAttribute('data-width');
+                const number = graph.querySelector('.stat-number');
+                const rawTarget = number.getAttribute('data-target');
+                const suffix = number.getAttribute('data-suffix') || '';
+
+                gsap.to(fill, {
+                    scrollTrigger: { trigger: graph, start: "top 80%" },
+                    width: targetWidth, duration: 1.5, ease: "power2.out"
+                });
+
+                if (!isNaN(parseInt(rawTarget))) {
+                    const targetNum = parseInt(rawTarget);
+                    gsap.to(number, {
+                        scrollTrigger: { trigger: graph, start: "top 80%" },
+                        innerText: targetNum, 
+                        duration: 1.5, 
+                        snap: { innerText: 1 }, 
+                        ease: "power2.out",
+                        onUpdate: function() { 
+                            this.targets()[0].innerHTML = Math.ceil(this.targets()[0].innerText).toLocaleString() + suffix; 
+                        }
+                    });
+                } else {
+                    number.innerText = rawTarget;
+                    gsap.from(number, {
+                        scrollTrigger: { trigger: graph, start: "top 80%" },
+                        opacity: 0, duration: 1.5, ease: "power2.out"
+                    });
+                }
+            });
+
+            // Parallax Text in Immersive Section
+            gsap.to(".immersive-text-overlay", {
+                scrollTrigger: {
+                    trigger: ".immersive-parallax",
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                },
+                y: 200, // Move text slower than scroll
+                opacity: 0.3
+            });
+            
+            // New Multi-Layer Parallax
+            gsap.utils.toArray('.parallax-layer').forEach(layer => {
+                const speed = layer.getAttribute('data-speed');
+                gsap.to(layer, {
+                    y: (i, target) => ScrollTrigger.maxScroll(window) * speed * 0.1, // Controlled parallax movement
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: ".immersive-parallax",
+                        start: "top bottom",
+                        end: "bottom top",
+                        scrub: true
+                    }
+                });
+            });
+            
+            // Game Section Animations
+            gsap.to(".game-content", {
+                scrollTrigger: { trigger: "#game-experience", start: "top 70%" },
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                ease: "power3.out"
+            });
+            
+            gsap.to(".game-visual", {
+                scrollTrigger: { trigger: "#game-experience", start: "top 70%" },
+                opacity: 1,
+                y: 0,
+                duration: 1.2,
+                delay: 0.2,
+                ease: "power3.out"
+            });
+
+
+            ScrollTrigger.create({ trigger: ".manifesto-section", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
+            ScrollTrigger.create({ trigger: "#journey", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0f291e" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
+            ScrollTrigger.create({ trigger: "#artifacts", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#2a231d" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0f291e" }) });
+            ScrollTrigger.create({ trigger: "#gallery", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#2a231d" }) });
+            ScrollTrigger.create({ trigger: "#values-list", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
+            ScrollTrigger.create({ trigger: "#impact", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#112240" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
+            ScrollTrigger.create({ trigger: "#game-experience", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#020c1b" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#112240" }) });
+        }
+    </script>
+</body>
+</html>
