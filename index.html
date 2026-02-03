@@ -27,6 +27,7 @@
                         accent: '#FFFFFF',   /* Pure White */
                         parchment: '#E6F1FF',/* Soft Blue-White */
                         glass: 'rgba(255, 255, 255, 0.05)',
+                        lime: '#ccff00',     /* Sporty Lime Accent from video */
                     },
                     fontFamily: {
                         serif: ['Playfair Display', 'serif'],
@@ -37,6 +38,7 @@
                     animation: {
                         'fog-flow': 'fogFlow 60s linear infinite',
                         'float': 'float 6s ease-in-out infinite',
+                        'spin-slow': 'spin 20s linear infinite',
                     },
                     keyframes: {
                         fogFlow: {
@@ -62,12 +64,24 @@
             padding: 0;
             cursor: none;
             overflow-x: hidden;
-            transition: background-color 1.2s ease;
+            transition: background-color 0.5s ease; /* Faster transition for scroll scrub */
         }
         
         body.loading {
             overflow: hidden;
             height: 100vh;
+        }
+
+        /* Contour Lines Background */
+        .contour-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
+            background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' id='svg' viewBox='0 0 1440 690' xmlns='http://www.w3.org/2000/svg' class='transition duration-300 ease-in-out delay-150'%3E%3Cpath d='M 0,700 C 0,700 0,350 0,350 C 126.4354066985646,368.5263157894737 252.8708133971292,387.0526315789474 363,381 C 473.1291866028708,374.9473684210526 566.9521531100478,344.3157894736842 673,348 C 779.0478468899522,351.6842105263158 897.3205741626793,389.6842105263158 1002,393 C 1106.6794258373207,396.3157894736842 1197.7655502392344,364.94736842105266 1276,345 C 1354.2344497607656,325.05263157894734 1419.6172248803828,316.5263157894737 1485,308 C 1485,308 1485,700 1485,700 Z' stroke='none' stroke-width='0' fill='none' class='transition-all duration-300 ease-in-out delay-150 path-0'%3E%3C/path%3E%3Cpath d='M 0,700 C 0,700 0,550 0,550 C 104.99521531100478,574.6124401913876 209.99043062200957,599.2248803827752 309,591 C 408.00956937799043,582.7751196172248 501.0334928229665,541.7129186602871 602,541 C 702.9665071770335,540.2870813397129 811.8755980861245,579.9234449760766 918,589 C 1024.1244019138755,598.0765550239234 1127.4641148325359,576.5933014354067 1215,556 C 1302.5358851674641,535.4066985645933 1374.267942583732,515.7033492822966 1446,496 C 1446,496 1446,700 1446,700 Z' stroke='white' stroke-width='1' fill='none' class='transition-all duration-300 ease-in-out delay-150 path-1'%3E%3C/path%3E%3Cpath d='M 0,700 C 0,700 0,750 0,750 C 111.9521531110048,746.5454545454545 223.90430622009572,743.0909090909091 323,737 C 422.09569377990428,730.9090909090909 508.334928229665,722.1818181818181 605,716 C 701.665071770335,709.8181818181819 808.7559808612441,706.1818181818182 910,707 C 1011.2440191387559,707.8181818181818 1106.641148325359,713.0909090909091 1205,713 C 1303.358851674641,712.9090909090909 1404.6794258373207,707.4545454545455 1506,702 C 1506,702 1506,700 1506,700 Z' stroke='white' stroke-width='1' fill='none' class='transition-all duration-300 ease-in-out delay-150 path-2'%3E%3C/path%3E%3C/svg%3E");
+            background-size: cover;
+            background-position: center;
         }
 
         /* Loading Screen */
@@ -165,12 +179,21 @@
         html.lenis { height: auto; }
         .lenis-smooth { scroll-behavior: auto !important; }
 
-        .ghost-text span {
-            opacity: 0;
+        /* MANIFESTO STYLES */
+        .manifesto-word {
             display: inline-block;
-            margin-right: 0.25em;
-            will-change: transform, opacity, filter;
-            transition: text-shadow 0.2s ease;
+            transition: all 0.5s ease;
+            cursor: default;
+        }
+        .manifesto-word span {
+            display: inline-block;
+            transition: color 0.1s ease, transform 0.3s ease, opacity 0.5s ease;
+        }
+        .manifesto-highlight {
+            color: #ccff00; /* Lime */
+            text-shadow: 0 0 10px rgba(204, 255, 0, 0.5);
+            transform: translateY(-5px);
+            opacity: 1 !important;
         }
 
         .parallax-container {
@@ -539,6 +562,8 @@
 
     <div class="grain"></div>
     <div class="fog-layer"></div>
+    <!-- NEW: Contour Lines Background -->
+    <div class="contour-bg"></div>
 
     <!-- Navigation -->
     <nav class="fixed top-0 left-0 w-full p-8 flex justify-between items-center z-50 font-mono text-xs uppercase tracking-widest bg-gradient-to-b from-deepDark/90 to-transparent backdrop-blur-[2px]">
@@ -578,11 +603,12 @@
         <!-- Ambient Green Light -->
         <div class="absolute top-1/2 left-0 w-[800px] h-[800px] bg-forest/30 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2"></div>
 
-        <div class="max-w-5xl relative z-10">
+        <div class="max-w-6xl relative z-10 px-8">
             <div class="font-mono text-accent text-xs mb-8 opacity-60">01 — Manifesto</div>
-            <!-- Improved Text Structure for Animation -->
-            <h2 class="ghost-text font-serif text-4xl md:text-6xl leading-tight text-parchment cursor-default">
-                Our journey began with a simple belief: that cultures are living treasures, and once lost, they can never truly be replaced. In a world moving faster than ever, many indigenous and lesser-known communities are fading into silence not because they lack value, but because they lack visibility. On these values as foundation, we documented cultures into high quality videos.
+            <!-- Improved Stylized Text with Trail Effect -->
+            <h2 class="manifesto-text font-serif text-3xl md:text-5xl leading-tight text-parchment/80 cursor-default" id="manifesto-container">
+                <!-- Content will be injected by JS for mixing fonts -->
+                Our journey began with a <span class="font-mono uppercase text-sm tracking-widest text-white">simple belief</span>: that cultures are <span class="font-signature text-6xl text-lime-200">living treasures</span>, and once lost, they can never truly be replaced. In a world <span class="italic font-light">moving faster than ever</span>, many indigenous and lesser-known communities are fading into <span class="font-mono uppercase text-sm tracking-widest text-white">silence</span> not because they lack value, but because they lack visibility. On these values as foundation, we documented cultures into <span class="font-signature text-6xl text-lime-200">high quality videos</span>.
             </h2>
         </div>
     </section>
@@ -678,7 +704,8 @@
     </section>
 
     <!-- 05. GALLERY (Earth -> Navy transition) -->
-    <section class="horizontal-outer overflow-hidden bg-gradient-to-r from-[#2a231d] to-[#0A192F] relative h-screen flex flex-col justify-center border-t border-white/5" id="gallery">
+    <!-- Removed static bg-gradient, now handled by GSAP -->
+    <section class="horizontal-outer overflow-hidden bg-[#2a231d] relative h-screen flex flex-col justify-center border-t border-white/5" id="gallery">
         
         <svg class="absolute top-0 left-0 w-[400vw] h-full pointer-events-none z-0 opacity-20" xmlns="http://www.w3.org/2000/svg">
              <path d="M0,500 Q400,200 800,500 T1600,500 T2400,200 T3200,500" fill="none" stroke="white" stroke-width="1" />
@@ -766,50 +793,50 @@
 
                 <!-- Value 2 -->
                 <div class="value-item group hoverable md:mt-24">
-                     <div class="flex items-center">
+                      <div class="flex items-center">
                         <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Preservation"></h3>
                     </div>
-                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
                         Safeguarding the intangible before it fades into silence. Every story matters.
                     </p>
                 </div>
 
                 <!-- Value 3 -->
                 <div class="value-item group hoverable">
-                     <div class="flex items-center">
+                      <div class="flex items-center">
                         <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Aether"></h3>
                     </div>
-                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
                         The space between the stars; the invisible connection binding us together.
                     </p>
                 </div>
 
                 <!-- Value 4 -->
                 <div class="value-item group hoverable md:mt-24">
-                     <div class="flex items-center">
+                      <div class="flex items-center">
                         <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="History"></h3>
                     </div>
-                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
                         Learning from the past to navigate the future. Wisdom is an inheritance.
                     </p>
                 </div>
 
                  <!-- Value 5 -->
                 <div class="value-item group hoverable">
-                     <div class="flex items-center">
+                      <div class="flex items-center">
                         <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Future"></h3>
                     </div>
-                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
                         Building a bridge for the next generation to walk upon with pride.
                     </p>
                 </div>
 
                  <!-- Value 6 -->
                 <div class="value-item group hoverable md:mt-24">
-                     <div class="flex items-center">
+                      <div class="flex items-center">
                         <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Nature"></h3>
                     </div>
-                     <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
                         Respecting the land that shapes the culture. We are stewards of the earth.
                     </p>
                 </div>
@@ -1333,39 +1360,70 @@
             gsap.from("#hero-title", { opacity: 0, y: 100, duration: 2, ease: "expo.out", delay: 0.5 });
             gsap.from("#hero-sub", { opacity: 0, letterSpacing: "0em", duration: 2, ease: "expo.out", delay: 0.8 });
             
-            const ghostText = document.querySelector('.ghost-text');
-            const words = ghostText.innerText.split(' ');
-            ghostText.innerHTML = words.map(word => `<span>${word}</span>`).join(' ');
-            
-            gsap.fromTo('.ghost-text span', 
-                { opacity: 0, filter: "blur(8px)", y: 20 },
-                {
-                    opacity: 1, filter: "blur(0px)", y: 0, color: '#FFFFFF',
-                    stagger: 0.05,
-                    duration: 1,
-                    scrollTrigger: { trigger: '.manifesto-section', start: 'top 70%', end: 'bottom 40%', scrub: 1 }
-                }
-            );
-
-            const manifestoSection = document.querySelector('.manifesto-section');
-            manifestoSection.addEventListener('mousemove', (e) => {
-                const spans = document.querySelectorAll('.ghost-text span');
-                spans.forEach(span => {
-                    const rect = span.getBoundingClientRect();
-                    const distance = Math.hypot(
-                        e.clientX - (rect.left + rect.width / 2),
-                        e.clientY - (rect.top + rect.height / 2)
-                    );
+            // MANIFESTO TRAIL INTERACTION LOGIC
+            const manifestoContainer = document.getElementById('manifesto-container');
+            // We only apply this interaction if the element exists and hasn't been destroyed
+            if(manifestoContainer) {
+                 // Split into words manually if not already (HTML structure handles styling, here we handle interaction)
+                 // Actually, let's wrap every word in a span for the proximity effect
+                 const wrapWords = (el) => {
+                    const childNodes = Array.from(el.childNodes);
+                    el.innerHTML = '';
                     
-                    if (distance < 120) {
-                         const intensity = 1 - (distance / 120);
-                         span.style.textShadow = `0 0 ${intensity * 15}px rgba(255,255,255, ${intensity * 0.8})`;
-                         span.style.color = '#FFFFFF';
-                    } else {
-                         span.style.textShadow = 'none';
-                    }
-                });
-            });
+                    childNodes.forEach(node => {
+                        if(node.nodeType === 3) { // Text node
+                            const words = node.textContent.trim().split(/\s+/);
+                            words.forEach(word => {
+                                if(word) {
+                                    const span = document.createElement('span');
+                                    span.className = 'manifesto-word px-1';
+                                    span.innerHTML = `<span>${word}</span>`;
+                                    el.appendChild(span);
+                                }
+                            });
+                        } else {
+                            el.appendChild(node); // Keep existing stylized spans
+                        }
+                    });
+                 };
+                 // NOTE: Since we have complex HTML inside, simple word splitting might break structure.
+                 // Instead, we will apply the listener to the whole container and calculate distance to children.
+                 
+                 manifestoContainer.addEventListener('mousemove', (e) => {
+                     const words = manifestoContainer.querySelectorAll('span'); // Target inner spans or mixed elements
+                     words.forEach(word => {
+                         const rect = word.getBoundingClientRect();
+                         const centerX = rect.left + rect.width / 2;
+                         const centerY = rect.top + rect.height / 2;
+                         
+                         const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+                         const maxDist = 200;
+                         
+                         if(dist < maxDist) {
+                             // Map distance to opacity/color
+                             const intensity = 1 - (dist / maxDist);
+                             if(word.classList.contains('manifesto-word') || word.parentElement.classList.contains('manifesto-word') || word.tagName === 'SPAN') {
+                                word.style.color = `rgba(255, 255, 255, ${0.5 + intensity * 0.5})`;
+                                word.style.textShadow = `0 0 ${intensity * 10}px rgba(255,255,255,${intensity * 0.5})`;
+                                word.style.transform = `translateY(${intensity * -2}px)`;
+                             }
+                         } else {
+                             word.style.color = '';
+                             word.style.textShadow = '';
+                             word.style.transform = '';
+                         }
+                     });
+                 });
+                 
+                 manifestoContainer.addEventListener('mouseleave', () => {
+                     const words = manifestoContainer.querySelectorAll('span');
+                     words.forEach(word => {
+                         word.style.color = '';
+                         word.style.textShadow = '';
+                         word.style.transform = '';
+                     });
+                 });
+            }
 
             gsap.to(".parallax-img", {
                 scrollTrigger: { trigger: "header", start: "top top", end: "bottom top", scrub: true },
@@ -1388,16 +1446,45 @@
             });
 
             const track = document.querySelector('.horizontal-track');
+            const outer = document.querySelector('.horizontal-outer');
+            
             function getScrollAmount() { return -(track.scrollWidth - window.innerWidth); }
-            ScrollTrigger.create({
-                trigger: ".horizontal-outer",
-                start: "top top",
-                end: () => `+=${getScrollAmount() * -1.5}`,
-                pin: true,
-                animation: gsap.to(track, { x: getScrollAmount, ease: "none" }),
-                scrub: 1,
-                invalidateOnRefresh: true
+            
+            // Main Horizontal Scroll Pin
+            const hScroll = gsap.to(track, {
+                x: getScrollAmount,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: ".horizontal-outer",
+                    start: "top top",
+                    end: () => `+=${getScrollAmount() * -1.5}`,
+                    pin: true,
+                    scrub: 1,
+                    invalidateOnRefresh: true,
+                    // DYNAMIC BACKGROUND COLOR INTERPOLATION
+                    onUpdate: (self) => {
+                        // self.progress is 0 to 1
+                        // We map progress to color interpolation using GSAP utility or simple logic
+                        // But since we want smooth scrub, we can just animate the prop directly in a separate tween linked to the same scroll trigger? 
+                        // Actually, ScrollTrigger can handle multiple animations.
+                    }
+                }
             });
+            
+            // Separate Tween for Background Color linked to the SAME scroll distance
+            gsap.fromTo(".horizontal-outer", 
+                { backgroundColor: "#2a231d" }, 
+                { 
+                    backgroundColor: "#0A192F",
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: ".horizontal-outer",
+                        start: "top top",
+                        end: () => `+=${getScrollAmount() * -1.5}`, // Same end point as the scroll
+                        scrub: true
+                    }
+                }
+            );
 
             const connector = document.getElementById('values-connector');
             const length = connector.getTotalLength();
@@ -1562,7 +1649,8 @@
             ScrollTrigger.create({ trigger: ".manifesto-section", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
             ScrollTrigger.create({ trigger: "#journey", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0f291e" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
             ScrollTrigger.create({ trigger: "#artifacts", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#2a231d" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0f291e" }) });
-            ScrollTrigger.create({ trigger: "#gallery", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#2a231d" }) });
+            // Remove previous background trigger for gallery since we handle it specifically inside the gallery section now
+            // ScrollTrigger.create({ trigger: "#gallery", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#2a231d" }) });
             ScrollTrigger.create({ trigger: "#values-list", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
             ScrollTrigger.create({ trigger: "#impact", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#112240" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
             ScrollTrigger.create({ trigger: "#game-experience", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#020c1b" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#112240" }) });
