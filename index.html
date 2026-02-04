@@ -75,9 +75,13 @@
             color: #E6F1FF;
             margin: 0;
             padding: 0;
-            cursor: none;
+            cursor: default; 
             overflow-x: hidden;
-            transition: background-color 0.5s ease; /* Faster transition for scroll scrub */
+            transition: background-color 0.5s ease;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            body { cursor: none; }
         }
         
         body.loading {
@@ -120,7 +124,8 @@
 
         /* Restored Loading Bar Styles */
         .loader-bar-container {
-            width: 300px;
+            width: 80%;
+            max-width: 300px;
             height: 2px;
             background-color: rgba(255,255,255,0.1);
             margin-top: 2rem;
@@ -151,43 +156,37 @@
             pointer-events: auto;
         }
 
-        /* Main Cursor */
-        #custom-cursor {
+        /* Main Cursor - Desktop Only */
+        #custom-cursor, .cursor-trail {
             position: fixed;
-            width: 12px;
-            height: 12px;
-            background: #FFFFFF;
             border-radius: 50%;
             pointer-events: none;
-            z-index: 10001; /* Higher than Loader */
+            z-index: 10001;
             mix-blend-mode: difference;
-            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1), width 0.3s, height 0.3s;
-            left: 0; 
-            top: 0;
+            left: 0; top: 0;
             transform: translate(-50%, -50%);
+            display: none; /* Hidden by default for mobile */
+        }
+        
+        #custom-cursor {
+            width: 12px; height: 12px; background: #FFFFFF;
+            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1), width 0.3s, height 0.3s;
         }
 
-        /* Cursor Trail Elements */
         .cursor-trail {
-            position: fixed;
-            width: 8px;
-            height: 8px;
-            background: rgba(230, 241, 255, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 10000; /* Higher than Loader */
-            left: 0;
-            top: 0;
-            transform: translate(-50%, -50%);
+            width: 8px; height: 8px; background: rgba(230, 241, 255, 0.3);
+            z-index: 10000;
             transition: opacity 0.3s;
         }
 
-        body.hovering #custom-cursor {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(2px);
-            border: 1px solid rgba(255,255,255,0.5);
+        @media (hover: hover) and (pointer: fine) {
+            #custom-cursor, .cursor-trail { display: block; }
+            body.hovering #custom-cursor {
+                width: 60px; height: 60px;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(2px);
+                border: 1px solid rgba(255,255,255,0.5);
+            }
         }
 
         html.lenis { height: auto; }
@@ -196,23 +195,18 @@
         /* MANIFESTO STYLES */
         .manifesto-word {
             display: inline-block;
-            margin-right: 0.3em; /* Proper spacing for separated words */
-            opacity: 0.1; /* Start dim */
+            margin-right: 0.2em; /* Slightly tighter for flow */
+            opacity: 0.1;
             transform: translateY(10px);
-            transition: opacity 0.1s linear; /* Smooth scrub */
+            transition: opacity 0.1s linear;
             will-change: opacity, transform;
         }
-        .manifesto-highlight {
-            color: #ccff00; /* Lime */
-            text-shadow: 0 0 10px rgba(204, 255, 0, 0.5);
-        }
 
-        /* Loader Title Typewriter Cursor specifically */
         .loader-cursor {
             display: inline-block;
-            width: 4px; /* Thicker for the title */
+            width: 4px;
             height: 1em;
-            background-color: #4fc3f7; /* Navy/Blue Accent */
+            background-color: #4fc3f7;
             vertical-align: middle;
             animation: blink 0.8s step-end infinite;
             margin-left: 5px;
@@ -232,10 +226,7 @@
         /* Atmospheric Fog */
         .fog-layer {
             position: fixed;
-            top: 0; 
-            left: 0; 
-            width: 200%; 
-            height: 100%;
+            top: 0; left: 0; width: 200%; height: 100%;
             pointer-events: none;
             z-index: 2;
             opacity: 0.4;
@@ -265,21 +256,18 @@
         
         .vertical-section {
             min-height: 100vh;
-            padding: 10vw;
+            padding: 2rem 1rem;
+        }
+        @media (min-width: 768px) {
+            .vertical-section { padding: 10vw; }
         }
 
         .artifact-card {
             background: rgba(17, 34, 64, 0.6);
             border: 1px solid rgba(255,255,255,0.08);
             backdrop-filter: blur(10px);
-            transition: transform 0.4s ease, border-color 0.4s ease, background-color 0.4s ease, box-shadow 0.4s ease;
-        }
-        .artifact-card:hover {
-            transform: translateY(-10px) rotate(0deg) !important;
-            border-color: rgba(255,255,255,0.4);
-            background: rgba(23, 42, 69, 0.95);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            z-index: 50;
+            transition: transform 0.4s ease;
+            transform-style: preserve-3d; /* For 3D animation */
         }
 
         .bar-container {
@@ -288,17 +276,14 @@
             background: rgba(255,255,255,0.1);
             width: 100%;
             margin-top: 2rem;
-            overflow: visible;
         }
         .bar-fill {
             position: absolute;
-            bottom: 0;
-            left: 0;
+            bottom: 0; left: 0;
             height: 100%;
             background: #FFFFFF;
             width: 0%; 
         }
-        .stat-number { font-variant-numeric: tabular-nums; }
 
         .social-link {
             position: relative;
@@ -309,10 +294,8 @@
         .social-link::after {
             content: '';
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
+            bottom: 0; left: 0;
+            width: 100%; height: 1px;
             background: white;
             transform: scaleX(0);
             transform-origin: right;
@@ -325,15 +308,17 @@
         .social-icon { transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
         .social-link:hover .social-icon { transform: rotate(360deg) scale(1.2); }
 
+        /* Flip Cards */
         .flip-card {
             background-color: transparent;
             perspective: 1000px;
             cursor: pointer;
+            /* Force initial opacity to 0 to prevent FOUC before GSAP takes over */
+            opacity: 0; 
         }
         .flip-inner {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             text-align: center;
             transition: transform 0.8s;
             transform-style: preserve-3d;
@@ -341,8 +326,7 @@
         .flip-card.flipped .flip-inner { transform: rotateY(180deg); }
         .flip-front, .flip-back {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
         }
@@ -359,13 +343,12 @@
             animation: blink 1s step-end infinite;
             margin-left: 2px;
         }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         
         /* EXPANDABLE VALUE ITEM STYLES */
         .value-item {
-            height: 120px; /* Collapsed Height */
+            height: auto; min-height: 120px;
             border-left: 1px solid rgba(255,255,255,0.1);
-            padding-left: 2rem;
+            padding: 2rem 1rem 2rem 2rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -376,71 +359,77 @@
             backdrop-filter: blur(2px);
             overflow: hidden;
         }
-        .value-item:hover {
-            height: 220px; /* Expanded Height */
-            border-left-color: rgba(255,255,255,0.8);
-            background: rgba(17, 34, 64, 0.8);
+        @media(min-width: 768px) {
+            .value-item { height: 120px; }
+            .value-item:hover {
+                height: 220px;
+                border-left-color: rgba(255,255,255,0.8);
+                background: rgba(17, 34, 64, 0.8);
+            }
         }
         
         .value-desc {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.5s ease 0.1s;
+            opacity: 1; transform: none;
             display: block;
         }
-        .value-item:hover .value-desc {
-            opacity: 1;
-            transform: translateY(0);
+        @media(min-width: 768px) {
+            .value-desc {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.5s ease 0.1s;
+            }
+            .value-item:hover .value-desc {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .value-icon {
             position: absolute;
-            right: 2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 60px;
-            height: 60px;
+            right: 1rem; top: 2rem;
+            width: 40px; height: 40px;
             opacity: 0.3;
             transition: all 0.5s ease;
             filter: grayscale(100%);
             object-fit: contain;
         }
-        .value-item:hover .value-icon {
-            opacity: 1;
-            filter: grayscale(0%);
-            transform: translateY(-50%) scale(1.1);
+        @media(min-width: 768px) {
+            .value-icon {
+                right: 2rem; top: 50%;
+                transform: translateY(-50%);
+                width: 60px; height: 60px;
+            }
+            .value-item:hover .value-icon {
+                opacity: 1;
+                filter: grayscale(0%);
+                transform: translateY(-50%) scale(1.1);
+            }
         }
         
-        /* 3D Canvas Containers */
-        #hero-canvas, #values-canvas, #impact-canvas {
+        /* 3D Canvas Containers - Disable on Mobile */
+        #hero-canvas, #values-canvas, #impact-canvas, #artifact-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 1; 
             pointer-events: none; 
+            display: none; /* Default hidden on mobile */
         }
-        
-        #artifact-canvas {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
-            z-index: 5;
-            pointer-events: none;
+        @media(min-width: 768px) {
+             #hero-canvas, #values-canvas, #impact-canvas, #artifact-canvas { display: block; }
+             #artifact-canvas {
+                 top: 50%; left: 50%;
+                 transform: translate(-50%, -50%);
+                 z-index: 5;
+             }
         }
 
         /* Sound Button */
         .sound-btn {
             position: fixed;
-            bottom: 2rem;
-            left: 2rem;
+            bottom: 2rem; left: 2rem;
             z-index: 100;
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             border-radius: 50%;
             border: 1px solid rgba(255,255,255,0.2);
             display: flex;
@@ -451,16 +440,8 @@
             background: rgba(0,0,0,0.3);
             backdrop-filter: blur(5px);
         }
-        .sound-btn:hover {
-            border-color: rgba(255,255,255,0.8);
-            transform: scale(1.1);
-        }
         .sound-bar {
-            width: 2px;
-            height: 10px;
-            background: white;
-            margin: 0 1px;
-            animation: none;
+            width: 2px; height: 10px; background: white; margin: 0 1px;
         }
         .playing .sound-bar {
             animation: equalizer 1s infinite ease-in-out;
@@ -478,52 +459,50 @@
         /* New Immersive Layered Parallax */
         .immersive-parallax {
             position: relative;
-            height: 120vh;
+            height: 80vh; /* Shorter on mobile */
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+        @media(min-width: 768px) {
+            .immersive-parallax { height: 120vh; }
+        }
         .parallax-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 120%; /* Taller for movement */
+            top: 0; left: 0;
+            width: 100%; height: 120%;
             background-size: cover;
             background-position: center;
             will-change: transform;
         }
         
-        /* Using generic nature images that layer well conceptually */
         .layer-back {
-            /* Sky / Mountains */
             background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=3270&auto=format&fit=crop'); 
             z-index: 1;
-            transform: translateZ(0);
         }
         .layer-mid {
-            /* Mist / Hills */
             background-image: url('https://png.pngtree.com/png-clipart/20220909/ourmid/pngtree-fog-png-image_6144078.png');
             background-size: cover;
             opacity: 0.8;
             z-index: 2;
         }
         .layer-front {
-            /* Foreground elements - using a transparent PNG or CSS gradient to simulate depth if image fails */
             background: linear-gradient(to top, #0A192F 10%, transparent 60%);
             z-index: 3;
         }
 
         .immersive-text-overlay {
             font-family: 'Playfair Display', serif;
-            font-size: 10vw;
+            font-size: 15vw;
             color: rgba(255, 255, 255, 1);
             text-align: center;
             font-style: italic;
             z-index: 4;
-            mix-blend-mode: normal;
             text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        @media(min-width: 768px) {
+            .immersive-text-overlay { font-size: 10vw; }
         }
         
         /* Game Section Styles */
@@ -532,12 +511,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        .game-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
         
         .game-btn {
@@ -552,34 +525,27 @@
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: 0.5s;
         }
-        .game-btn:hover::before {
-            left: 100%;
-        }
+        .game-btn:hover::before { left: 100%; }
 
     </style>
 </head>
 <body class="font-light selection:bg-white selection:text-dark loading">
 
     <!-- AUDIO ELEMENT -->
-    <!-- PRELOAD AUTO ADDED -->
     <audio id="bg-music" loop preload="auto">
         <source src="https://files.catbox.moe/4krw1h.mp3" type="audio/mpeg">
     </audio>
 
     <!-- LOADING SCREEN -->
     <div id="loader">
-        <div class="text-center relative z-20 flex flex-col items-center">
+        <div class="text-center relative z-20 flex flex-col items-center p-4">
             
-            <!-- REMOVED THE FACE/RING CONTAINER HERE -->
-
             <!-- Container for Title & Logo (Side by Side) -->
-            <div class="flex items-center justify-center gap-5 mb-6 h-20 mt-20">
-                <!-- TYPEWRITER TEXT - CHANGED COLOR TO NAVY -->
-                <h1 class="font-serif text-6xl italic text-navy flex items-center">
+            <div class="flex items-center justify-center gap-2 md:gap-5 mb-6 h-20 mt-20">
+                <h1 class="font-serif text-4xl md:text-6xl italic text-navy flex items-center">
                     <span id="loader-title-text"></span><span class="loader-cursor"></span>
                 </h1>
-                <!-- BRANDING: Logo next to text and bigger -->
-                <img src="https://files.catbox.moe/kr9py2.png" class="h-16 w-auto opacity-80" alt="Loader Logo">
+                <img src="https://files.catbox.moe/kr9py2.png" class="h-10 md:h-16 w-auto opacity-80" alt="Loader Logo">
             </div>
 
             <!-- RESTORED METALLIC LOADING BAR -->
@@ -587,9 +553,9 @@
                 <div class="loader-line"></div>
             </div>
             
-            <div class="flex justify-between w-[300px] mx-auto mt-2">
-                 <p class="font-mono text-[10px] text-white/50 uppercase tracking-widest" id="loader-status">Initializing</p>
-                 <p class="font-mono text-[10px] text-white/50" id="loader-percent">0%</p>
+            <div class="flex justify-between w-[80%] max-w-[300px] mx-auto mt-2">
+                 <p class="font-mono text-[8px] md:text-[10px] text-white/50 uppercase tracking-widest" id="loader-status">Initializing</p>
+                 <p class="font-mono text-[8px] md:text-[10px] text-white/50" id="loader-percent">0%</p>
             </div>
             
             <!-- Enter Button -->
@@ -599,10 +565,10 @@
         </div>
         
          <!-- Tech Decorations in Corners -->
-        <div class="absolute top-8 left-8 font-mono text-[10px] text-white/20">
+        <div class="absolute top-4 left-4 md:top-8 md:left-8 font-mono text-[8px] md:text-[10px] text-white/20">
             SYS.ROOT.ACCESS<br>39.902° N, 116.407° E
         </div>
-        <div class="absolute bottom-8 right-8 font-mono text-[10px] text-white/20 text-right">
+        <div class="absolute bottom-4 right-4 md:bottom-8 md:right-8 font-mono text-[8px] md:text-[10px] text-white/20 text-right">
             ARCHIVE_ID: #8821<br>STATUS: ENCRYPTED
         </div>
 
@@ -619,7 +585,7 @@
         <div class="sound-bar"></div>
     </div>
 
-    <!-- Custom Cursor System -->
+    <!-- Custom Cursor System (Desktop Only via CSS) -->
     <div id="custom-cursor"></div>
     <div class="cursor-trail"></div>
     <div class="cursor-trail"></div>
@@ -627,16 +593,16 @@
 
     <div class="grain"></div>
     <div class="fog-layer"></div>
-    <!-- NEW: Contour Lines Background -->
+    <!-- Contour Lines Background -->
     <div class="contour-bg"></div>
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 w-full p-8 flex justify-between items-center z-50 font-mono text-xs uppercase tracking-widest bg-gradient-to-b from-deepDark/90 to-transparent backdrop-blur-[2px]">
+    <!-- Navigation - Scrollable on Mobile -->
+    <nav class="fixed top-0 left-0 w-full p-4 md:p-8 flex justify-between items-center z-50 font-mono text-xs uppercase tracking-widest bg-gradient-to-b from-deepDark/90 to-transparent backdrop-blur-[2px]">
         <!-- Logo Image -->
-        <a href="#" class="block hoverable">
-            <img src="https://files.catbox.moe/kr9py2.png" alt="Aether Logo" class="h-12 w-auto opacity-90 hover:opacity-100 transition-opacity">
+        <a href="#" class="block hoverable shrink-0">
+            <img src="https://files.catbox.moe/kr9py2.png" alt="Aether Logo" class="h-8 md:h-12 w-auto opacity-90 hover:opacity-100 transition-opacity">
         </a>
-        <div class="space-x-8">
+        <div class="flex space-x-6 md:space-x-8 overflow-x-auto pl-4 no-scrollbar whitespace-nowrap mask-nav">
             <a href="#" class="hover:text-accent transition hoverable">Manifesto</a>
             <a href="#journey" class="hover:text-accent transition hoverable">Journey</a>
             <a href="#gallery" class="hover:text-accent transition hoverable">Gallery</a>
@@ -649,13 +615,13 @@
         <!-- 3D Background -->
         <div id="hero-canvas"></div>
 
-        <div class="z-10 text-center space-y-4 pointer-events-none relative">
+        <div class="z-10 text-center space-y-4 pointer-events-none relative px-4">
             <!-- BRANDING: Subtle Watermark Logo -->
              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 opacity-[0.03]">
                 <img src="https://files.catbox.moe/kr9py2.png" class="w-[80vw] h-auto grayscale" alt="Watermark">
             </div>
 
-            <div class="font-mono text-accent text-sm tracking-[0.5em] uppercase mb-4" id="hero-sub">Mapping the Path</div>
+            <div class="font-mono text-accent text-xs md:text-sm tracking-[0.3em] md:tracking-[0.5em] uppercase mb-4" id="hero-sub">Mapping the Path</div>
             <h1 class="font-serif text-6xl md:text-9xl italic text-white mix-blend-overlay" id="hero-title">Aether</h1>
             <div class="mt-12 opacity-50 text-xs font-mono animate-bounce text-white">Scroll to Begin</div>
         </div>
@@ -668,28 +634,22 @@
         </div>
     </header>
 
-    <!-- 02. MANIFESTO (Blend Dark -> Forest) -->
-    <!-- NEW: Pinned, Scrubbable Text Reveal -->
-    <section class="manifesto-section bg-[#0A192F] vertical-section relative overflow-hidden flex flex-col justify-center">
+    <!-- 02. MANIFESTO -->
+    <section class="manifesto-section bg-[#0A192F] vertical-section relative overflow-hidden flex flex-col justify-center min-h-[70vh]">
         <!-- Ambient Green Light -->
         <div class="absolute top-1/2 left-0 w-[800px] h-[800px] bg-forest/30 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2"></div>
         
-        <!-- BRANDING: Floating Logo Watermark -->
-        <div class="absolute right-0 top-0 p-12 opacity-5 pointer-events-none mix-blend-overlay">
-             <img src="https://files.catbox.moe/kr9py2.png" class="w-64 h-auto transform rotate-12" alt="Decorative Logo">
-        </div>
-
-        <div class="max-w-6xl relative z-10 px-8 w-full mx-auto">
+        <div class="max-w-6xl relative z-10 px-4 md:px-8 w-full mx-auto">
             <div class="font-mono text-accent text-xs mb-8 opacity-60">01 — Manifesto</div>
             
-            <div class="manifesto-text font-serif text-3xl md:text-6xl leading-tight text-parchment/90 cursor-default" id="manifesto-container">
+            <div class="manifesto-text font-serif text-2xl md:text-6xl leading-tight text-parchment/90 cursor-default" id="manifesto-container">
                 <!-- Content prepared for word splitting -->
                 Our journey began with a simple belief: that cultures are living treasures, and once lost, they can never truly be replaced. In a world moving faster than ever, many indigenous and lesser-known communities are fading into silence not because they lack value, but because they lack visibility. On these values as foundation, we documented cultures into high quality videos.
             </div>
         </div>
     </section>
 
-    <!-- NEW MULTI-LAYER PARALLAX SECTION -->
+    <!-- MULTI-LAYER PARALLAX SECTION -->
     <section class="immersive-parallax bg-[#0A192F]">
         <div class="parallax-layer layer-back" data-speed="0.1"></div>
         <div class="parallax-layer layer-mid" data-speed="0.3"></div>
@@ -698,173 +658,175 @@
         <h2 class="immersive-text-overlay" data-speed="0.4">Exploring<br>Cultures</h2>
     </section>
 
-    <!-- 03. PINNED SECTION (Blend Forest -> Earth) -->
-    <section class="pinned-section vertical-section relative flex-row items-start space-x-20 overflow-visible bg-gradient-to-b from-[#0A192F] to-[#1a2e25]" id="journey">
-        <div class="w-1/2 sticky top-10 h-[90vh] parallax-container shadow-2xl border border-white/10 hoverable">
+    <!-- 03. PINNED SECTION (Journey) -->
+    <!-- Mobile: Stacked, Desktop: Pinned Side-by-Side -->
+    <section class="pinned-section vertical-section relative flex flex-col md:flex-row items-start md:space-x-20 overflow-visible bg-gradient-to-b from-[#0A192F] to-[#1a2e25]" id="journey">
+        <div class="w-full md:w-1/2 md:sticky md:top-10 h-[50vh] md:h-[90vh] parallax-container shadow-2xl border border-white/10 hoverable mb-10 md:mb-0">
             <img src="https://images.pexels.com/photos/3560366/pexels-photo-3560366.jpeg?cs=srgb&dl=pexels-matthardy-3560366.jpg&fm=jpg" 
                   class="w-full h-full object-cover" alt="Sustainable Van">
-            <div class="absolute bottom-10 left-10 font-mono text-xs bg-deepDark/90 text-white p-4 border border-white/20 backdrop-blur-md flex items-center gap-3">
+            <div class="absolute bottom-4 left-4 md:bottom-10 md:left-10 font-mono text-[10px] md:text-xs bg-deepDark/90 text-white p-2 md:p-4 border border-white/20 backdrop-blur-md flex items-center gap-3">
                 <img src="https://files.catbox.moe/kr9py2.png" class="h-4 w-auto opacity-70" alt="Small Logo">
                 The Camper Van
             </div>
         </div>
-        <div class="w-1/2 pt-[20vh] space-y-[80vh] pb-[60vh]">
-            <div class="space-y-6 chapter">
-                <h3 class="font-serif text-5xl italic text-white">Conservation</h3>
-                <p class="text-parchment/70 leading-relaxed font-mono text-sm uppercase tracking-wide max-w-md">
+        <div class="w-full md:w-1/2 md:pt-[20vh] space-y-16 md:space-y-[80vh] pb-10 md:pb-[60vh]">
+            <div class="space-y-4 md:space-y-6 chapter">
+                <h3 class="font-serif text-3xl md:text-5xl italic text-white">Conservation</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md">
                     Documenting stories isn't enough. We build living archives that local communities can use to teach the next generation.
                 </p>
             </div>
-            <div class="space-y-6 chapter">
-                <h3 class="font-serif text-5xl italic text-white">Exploration</h3>
-                <p class="text-parchment/70 leading-relaxed font-mono text-sm uppercase tracking-wide max-w-md">
+            <div class="space-y-4 md:space-y-6 chapter">
+                <h3 class="font-serif text-3xl md:text-5xl italic text-white">Exploration</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md">
                     Curiosity is our fuel. We travel into the remote corners of the world to find the sparks of culture that remain.
                 </p>
             </div>
-            <div class="space-y-6 chapter">
-                <h3 class="font-serif text-5xl italic text-white">Sustainability</h3>
-                <p class="text-parchment/70 leading-relaxed font-mono text-sm uppercase tracking-wide max-w-md">
+            <div class="space-y-4 md:space-y-6 chapter">
+                <h3 class="font-serif text-3xl md:text-5xl italic text-white">Sustainability</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md">
                     The path must be light. Our journey respects the land and the people, leaving behind only inspiration.
                 </p>
             </div>
         </div>
     </section>
 
-    <!-- 04. ARTIFACTS (Earth Tones) -->
-    <section id="artifacts" class="h-[250vh] relative bg-[#1a2e25]">
-        <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+    <!-- 04. ARTIFACTS -->
+    <section id="artifacts" class="h-auto md:h-[250vh] relative bg-[#1a2e25] py-20 md:py-0">
+        <div class="md:sticky md:top-0 h-auto md:h-screen w-full overflow-hidden flex flex-col md:flex-row items-center justify-center relative">
             <!-- Background Blend -->
             <div class="absolute inset-0 bg-gradient-to-br from-[#1a2e25] to-[#2a231d] opacity-50"></div>
             
-            <div class="zoom-container w-full h-full relative flex items-center justify-center">
+            <div class="zoom-container w-full h-full relative flex flex-col md:items-center md:justify-center p-4">
                 
-                <!-- 3D Artifact Canvas -->
+                <!-- 3D Artifact Canvas (Desktop Only) -->
                 <div id="artifact-canvas"></div>
 
-                <div class="relative z-10 text-center">
-                    <div class="w-[40vw] h-[40vw] rounded-full border border-white/10 flex items-center justify-center backdrop-blur-sm bg-white/5 shadow-2xl">
-                         <h2 class="font-serif text-6xl italic text-white">Uncovering<br>History</h2>
+                <div class="relative z-10 text-center mb-10 md:mb-0">
+                    <div class="w-48 h-48 md:w-[40vw] md:h-[40vw] mx-auto rounded-full border border-white/10 flex items-center justify-center backdrop-blur-sm bg-white/5 shadow-2xl">
+                         <h2 class="font-serif text-3xl md:text-6xl italic text-white">Uncovering<br>History</h2>
                     </div>
                 </div>
 
-                <!-- 1. Top Left: Ancient Textiles -->
-                <div class="absolute top-[15%] left-[10%] artifact-card p-6 w-64 rounded-sm transform -rotate-6 z-0 hoverable shadow-[0_0_15px_rgba(0,0,0,0.3)] border-white/20">
-                    <div class="h-32 bg-gray-800 mb-4 overflow-hidden relative border border-white/5">
-                         <div class="absolute top-2 right-2 opacity-50"><img src="https://files.catbox.moe/kr9py2.png" class="h-4 w-auto"></div>
-                        <img src="https://embroideryviet.com/wp-content/uploads/2017/10/Ethnic-travel-Lao-Lu-textiles-Vietnam.jpg" class="w-full h-full object-cover opacity-80">
+                <!-- Artifact Cards - Relative on Mobile, Absolute on Desktop -->
+                <div class="flex flex-col gap-8 md:block">
+                    <!-- 1. Ancient Textiles -->
+                    <div class="relative md:absolute top-auto md:top-[15%] left-auto md:left-[10%] artifact-card p-4 md:p-6 w-full md:w-64 rounded-sm transform md:-rotate-6 z-0 hoverable shadow-[0_0_15px_rgba(0,0,0,0.3)] border-white/20">
+                        <div class="h-40 md:h-32 bg-gray-800 mb-4 overflow-hidden relative border border-white/5">
+                             <div class="absolute top-2 right-2 opacity-50"><img src="https://files.catbox.moe/kr9py2.png" class="h-4 w-auto"></div>
+                            <img src="https://embroideryviet.com/wp-content/uploads/2017/10/Ethnic-travel-Lao-Lu-textiles-Vietnam.jpg" class="w-full h-full object-cover opacity-80">
+                        </div>
+                        <p class="font-serif italic text-lg text-white">Ancient Textiles</p>
                     </div>
-                    <p class="font-serif italic text-lg text-white">Ancient Textiles</p>
-                </div>
 
-                <!-- 2. Top Right: The Joy of Culture (Renamed from Highland Mist) -->
-                <div class="absolute top-[15%] right-[10%] artifact-card p-5 w-52 rounded-sm transform rotate-6 z-10 hoverable shadow-[0_0_25px_rgba(255,255,255,0.05)] border-white/20">
-                    <div class="h-36 bg-gray-800 mb-4 overflow-hidden relative border border-white/5">
-                        <div class="absolute top-2 right-2 opacity-50"><img src="https://files.catbox.moe/kr9py2.png" class="h-4 w-auto"></div>
-                        <img src="https://files.catbox.moe/tgwkuc.jpg" class="w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-110">
+                    <!-- 2. The Joy of Culture -->
+                    <div class="relative md:absolute top-auto md:top-[15%] right-auto md:right-[10%] artifact-card p-5 w-full md:w-52 rounded-sm transform md:rotate-6 z-10 hoverable shadow-[0_0_25px_rgba(255,255,255,0.05)] border-white/20">
+                        <div class="h-40 md:h-36 bg-gray-800 mb-4 overflow-hidden relative border border-white/5">
+                            <div class="absolute top-2 right-2 opacity-50"><img src="https://files.catbox.moe/kr9py2.png" class="h-4 w-auto"></div>
+                            <img src="https://files.catbox.moe/tgwkuc.jpg" class="w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-110">
+                        </div>
+                        <div class="font-mono text-[10px] text-accent uppercase tracking-widest mb-2">Ref 012</div>
+                        <p class="font-serif italic text-base text-white">The Joy of Culture</p>
                     </div>
-                    <div class="font-mono text-[10px] text-accent uppercase tracking-widest mb-2">Ref 012</div>
-                    <p class="font-serif italic text-base text-white">The Joy of Culture</p>
                 </div>
 
-                <!-- 3. Bottom Left: Phan Signature -->
-                <div class="absolute bottom-[20%] left-[15%] z-20 transform -rotate-6 hoverable mix-blend-screen">
-                    <span class="font-signature text-7xl md:text-9xl text-blue-300 opacity-90" style="filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.4));">Phan</span>
+                <!-- Signatures -->
+                <div class="md:absolute bottom-[20%] left-[15%] z-20 transform md:-rotate-6 hoverable mix-blend-screen text-center mt-8 md:mt-0">
+                    <span class="font-signature text-6xl md:text-9xl text-blue-300 opacity-90" style="filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.4));">Phan</span>
                 </div>
 
-                <!-- 4. Bottom Right: Chi Signature -->
-                <div class="absolute bottom-[20%] right-[15%] z-20 transform rotate-3 hoverable mix-blend-screen">
-                     <span class="font-signature text-7xl md:text-9xl text-blue-300 opacity-90" style="filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.4));">Chi</span>
+                <div class="md:absolute bottom-[20%] right-[15%] z-20 transform md:rotate-3 hoverable mix-blend-screen text-center mt-4 md:mt-0">
+                     <span class="font-signature text-6xl md:text-9xl text-blue-300 opacity-90" style="filter: drop-shadow(0 0 8px rgba(147, 197, 253, 0.4));">Chi</span>
                 </div>
-            </div>
-             <div class="absolute bottom-10 w-full text-center z-30 opacity-0 zoom-caption">
-                <span class="font-mono text-xs uppercase tracking-[0.3em] text-white/50">Digging Deeper into the Archives</span>
             </div>
         </div>
     </section>
 
-    <!-- 05. GALLERY (Earth -> Navy transition) -->
-    <!-- Removed static bg-gradient, now handled by GSAP -->
-    <section class="horizontal-outer overflow-hidden bg-[#2a231d] relative h-screen flex flex-col justify-center border-t border-white/5" id="gallery">
+    <!-- 05. GALLERY (Adaptive: Horizontal on Desktop, Vertical on Mobile) -->
+    <!-- Changed bg to fix gap -->
+    <section class="horizontal-outer overflow-hidden bg-[#2a231d] relative h-auto md:h-screen flex flex-col justify-center border-t border-white/5" id="gallery">
         
-        <svg class="absolute top-0 left-0 w-[400vw] h-full pointer-events-none z-0 opacity-20" xmlns="http://www.w3.org/2000/svg">
+        <svg class="absolute top-0 left-0 w-[400vw] h-full pointer-events-none z-0 opacity-20 hidden md:block" xmlns="http://www.w3.org/2000/svg">
              <path d="M0,500 Q400,200 800,500 T1600,500 T2400,200 T3200,500" fill="none" stroke="white" stroke-width="1" />
              <path d="M0,300 Q300,600 900,300 T1800,300 T2700,600" fill="none" stroke="white" stroke-width="0.5" stroke-dasharray="10,10" />
         </svg>
 
-        <div class="horizontal-track flex h-full relative w-[400vw] items-center">
+        <!-- Track: Column on mobile, Row on desktop - WIDTH REDUCED TO 340vw -->
+        <div class="horizontal-track flex flex-col md:flex-row h-auto md:h-full relative w-full md:w-[340vw] items-start md:items-center px-4 md:px-0 py-20 md:py-0 space-y-12 md:space-y-0">
             
             <!-- Intro Text -->
-            <div class="absolute left-[5vw] top-[20vh] w-[30vw] space-y-8 z-10">
+            <div class="relative md:absolute left-0 md:left-[5vw] md:top-[20vh] w-full md:w-[30vw] space-y-4 md:space-y-8 z-10 mb-8 md:mb-0">
                 <div class="font-mono text-accent text-xs">03 — Field Notes</div>
-                <h2 class="font-serif text-5xl md:text-7xl italic leading-tight text-white">
+                <h2 class="font-serif text-4xl md:text-7xl italic leading-tight text-white">
                     Abstract <br> Memory
                 </h2>
-                <p class="font-mono text-xs text-parchment/60 leading-relaxed max-sm sm:max-w-sm">
+                <p class="font-mono text-xs text-parchment/60 leading-relaxed max-w-sm">
                     A non-linear map of human experience. Following the invisible threads that connect us all.
                 </p>
             </div>
 
             <!-- Item 1: Silk Weavers -->
-            <div class="absolute left-[50vw] top-[10vh] w-[25vw] h-[35vh] group hover:z-20 transition-all duration-500 hoverable">
+            <div class="relative md:absolute left-auto md:left-[50vw] md:top-[10vh] w-full md:w-[25vw] h-[30vh] md:h-[35vh] group hover:z-20 transition-all duration-500 hoverable">
                 <img src="https://madebygaia.vn/cdn/shop/articles/vietnamese-silk-villages.jpg?v=1730134779" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out border border-white/10 p-2 bg-white/5 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 <div class="font-mono text-[10px] text-white/50 mt-2 text-right">Silk Weavers</div>
             </div>
 
             <!-- Item 2: Local Songs -->
-            <div class="absolute left-[90vw] bottom-[15vh] w-[30vw] h-[45vh] group hover:z-20 transition-all duration-500 hoverable">
+            <div class="relative md:absolute left-auto md:left-[90vw] md:bottom-[15vh] w-full md:w-[30vw] h-[30vh] md:h-[45vh] group hover:z-20 transition-all duration-500 hoverable">
                 <img src="https://cdn2.tuoitre.vn/thumb_w/1200/tto/i/s626/2017/11/16/c3a9eccb.jpg" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out border border-white/10 p-2 bg-white/5 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 <div class="font-mono text-[10px] text-white/50 mt-2">Local Songs</div>
             </div>
 
-            <!-- NEW ITEM: Water Puppetry (Filling Gap) -->
-            <div class="absolute left-[115vw] top-[15vh] w-[18vw] h-[25vh] group hover:z-20 transition-all duration-500 hoverable">
+            <!-- Item: Water Puppetry -->
+            <div class="relative md:absolute left-auto md:left-[115vw] md:top-[15vh] w-full md:w-[18vw] h-[25vh] group hover:z-20 transition-all duration-500 hoverable">
                 <div class="absolute -top-6 -left-6 z-10 opacity-60"><img src="https://files.catbox.moe/kr9py2.png" class="h-8 w-auto"></div>
                 <img src="https://bcp.cdnchinhphu.vn/344443456812359680/2022/8/2/roi5-1659409522332994724698.jpg" 
                       class="w-full h-full object-cover rounded-lg transition-all duration-500 ease-out border border-white/10 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(204,255,0,0.2)]">
                  <div class="font-mono text-[10px] text-white/50 mt-2 text-center">Water Puppetry</div>
             </div>
 
-            <!-- Item 3: Pagodas (Circle) -->
-            <div class="absolute left-[140vw] top-[50vh] w-[20vw] h-[20vw] rounded-full overflow-hidden group hover:z-20 border border-white/10 bg-white/5 p-1 hoverable">
+            <!-- Item 3: Pagodas - FIXED TEXT ALIGNMENT -->
+            <div class="relative md:absolute left-auto md:left-[140vw] md:top-[50vh] w-[40vw] h-[40vw] md:w-[20vw] md:h-[20vw] mx-auto rounded-full overflow-hidden group hover:z-20 border border-white/10 bg-white/5 p-1 hoverable">
                  <img src="https://travelsense.asia/wp-content/uploads/2014/02/buddha-pagoda-vietnam.jpg" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-110">
             </div>
-             <div class="absolute left-[150vw] top-[75vh] font-mono text-[10px] text-white/50">Pagodas</div>
+             <!-- Moved text to align under image -->
+             <div class="relative md:absolute left-auto md:left-[140vw] md:top-[50vh] md:mt-[21vw] font-mono text-[10px] text-white/50 text-center w-full md:w-[20vw]">Pagodas</div>
 
-            <!-- NEW ITEM: Hoi An Lanterns -->
-            <div class="absolute left-[170vw] top-[10vh] w-[22vw] h-[30vh] group hover:z-20 transition-all duration-500 hoverable">
+            <!-- Item 4: Lanterns -->
+            <div class="relative md:absolute left-auto md:left-[170vw] md:top-[10vh] w-full md:w-[22vw] h-[30vh] group hover:z-20 transition-all duration-500 hoverable">
                 <img src="https://cdn1.vietnamtourism.org.vn/images/content/2016/11/29/giant-lantern-festival-to-light-up-city-5bc1.jpg" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out border-b-4 border-lime-400/50 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(255,165,0,0.3)]">
                 <div class="font-mono text-[10px] text-white/50 mt-2">Lantern Festival</div>
             </div>
 
-            <!-- Item 4: Cultural Minorities -->
-            <div class="absolute left-[200vw] top-[35vh] w-[35vw] h-[50vh] group hover:z-20 transition-all duration-500 hoverable">
+            <!-- Item 5: Minorities -->
+            <div class="relative md:absolute left-auto md:left-[200vw] md:top-[35vh] w-full md:w-[35vw] h-[40vh] md:h-[50vh] group hover:z-20 transition-all duration-500 hoverable">
                 <img src="https://vpt-en.b-cdn.net/wp-content/uploads/s/06/sapa-ta-van.jpg.webp" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out border border-white/10 p-2 bg-white/5 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                 <div class="font-mono text-[10px] text-white/50 mt-2 text-right">Cultural Minorities</div>
             </div>
 
-             <!-- NEW ITEM: Incense Art (Restored Image, New Text) -->
-            <div class="absolute left-[245vw] bottom-[10vh] w-[20vw] h-[25vw] rounded-t-full overflow-hidden group hover:z-20 transition-all duration-500 hoverable border border-white/20">
+             <!-- Item 6: Incense -->
+            <div class="relative md:absolute left-auto md:left-[245vw] md:bottom-[10vh] w-full md:w-[20vw] h-[30vh] md:h-[25vw] rounded-t-full overflow-hidden group hover:z-20 transition-all duration-500 hoverable border border-white/20">
                 <img src="https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070&auto=format&fit=crop" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-110">
                 <div class="absolute bottom-0 left-0 w-full bg-black/50 p-2 text-center font-mono text-[10px] text-white">Bay Views</div>
             </div>
 
             <!-- Quote End -->
-            <div class="absolute left-[290vw] top-[40vh] w-[30vw] border-l border-white/20 pl-4">
-                <p class="font-serif italic text-3xl text-white/90">"To map a culture is to map the stars. Everything is connected."</p>
+            <div class="relative md:absolute left-auto md:left-[290vw] md:top-[40vh] w-full md:w-[30vw] border-l border-white/20 pl-4 py-8 md:py-0">
+                <p class="font-serif italic text-2xl md:text-3xl text-white/90">"To map a culture is to map the stars. Everything is connected."</p>
                 <img src="https://files.catbox.moe/kr9py2.png" class="h-8 w-auto mt-4 opacity-50" alt="End Logo">
             </div>
 
         </div>
     </section>
 
-    <!-- NEW VALUES TYPEWRITER SECTION -->
-    <section id="values-list" class="relative min-h-[150vh] bg-[#0A192F] py-32 flex flex-col items-center">
+    <!-- 06. VALUES SECTION -->
+    <section id="values-list" class="relative min-h-[150vh] bg-[#0A192F] py-20 md:py-32 flex flex-col items-center">
         
         <!-- 3D Canvas for Values -->
         <div id="values-canvas"></div>
@@ -873,21 +835,13 @@
         <div class="absolute inset-0 z-0 pointer-events-none">
              <img src="https://i.ytimg.com/vi/Gs5TS8kDPSw/maxresdefault.jpg" 
                    class="w-full h-full object-cover opacity-40 blur-sm" alt="Values Background">
-             <!-- Deep rich gradient overlay -->
              <div class="absolute inset-0 bg-gradient-to-b from-[#0A192F] via-[#112240]/60 to-[#0A192F]"></div>
         </div>
 
-        <!-- Handdrawn Connecting Line SVG -->
-        <svg class="absolute top-0 left-0 w-full h-full z-10 pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
-            <!-- Winding path that roughly zig-zags between the 2-column layout -->
-            <path id="values-connector" d="M 25 5 Q 50 10 75 20 T 25 35 T 75 50 T 25 65 T 75 80" 
-                  fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.5" stroke-dasharray="5,5" />
-        </svg>
-
-        <div class="relative z-20 w-full max-w-5xl px-8">
-            <div class="font-mono text-accent text-xs mb-20 opacity-60">04 — Core Principles</div>
+        <div class="relative z-20 w-full max-w-5xl px-4 md:px-8">
+            <div class="font-mono text-accent text-xs mb-10 md:mb-20 opacity-60">04 — Core Principles</div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-24">
                 
                 <!-- Value 1 -->
                 <div class="value-item group hoverable">
@@ -926,7 +880,7 @@
                 <div class="value-item group hoverable md:mt-24">
                       <div class="flex items-center">
                         <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="History"></h3>
-                        <img src="https://img.icons8.com/?size=100&id=15929&format=png&color=000000" class="value-icon" alt="History Icon">
+                        <img src="https://img.icons8.com/?size=100&id=115230&format=png&color=FFFFFF" class="value-icon" alt="History Icon">
                     </div>
                       <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
                         Learning from the past to navigate the future. Wisdom is an inheritance.
@@ -959,16 +913,15 @@
         </div>
     </section>
 
-    <!-- 06. FLIPPABLE VOICES SECTION (Updated) -->
-    <section id="voices" class="min-h-screen bg-gradient-to-b from-[#0A192F] to-[#112240] py-32 vertical-section">
+    <!-- 07. VOICES SECTION -->
+    <section id="voices" class="min-h-screen bg-gradient-to-b from-[#0A192F] to-[#112240] py-20 md:py-32 vertical-section">
         <div class="max-w-6xl w-full mx-auto mb-32">
             <div class="font-mono text-accent text-xs mb-12 opacity-60">05 — The Voices</div>
             
-            <!-- Grid reduced to 2 columns for impact -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
                 
                 <!-- Flip Card 1: Ngoc Phan -->
-                <div class="flip-card h-[80vh] w-full group hoverable">
+                <div class="flip-card h-[60vh] md:h-[80vh] w-full group hoverable">
                     <div class="flip-inner relative w-full h-full transition-transform duration-700">
                         <!-- Front -->
                         <div class="flip-front absolute w-full h-full bg-[#0A192F] border border-white/10 overflow-hidden">
@@ -976,17 +929,17 @@
                                  onerror="this.src='https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop'"
                                  class="w-full h-full object-cover transition-all duration-700 grayscale group-hover:grayscale-0" alt="Ngoc Phan">
                             <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-dark to-transparent">
-                                 <h3 class="font-serif text-4xl italic text-white">Ngoc Phan</h3>
+                                 <h3 class="font-serif text-3xl md:text-4xl italic text-white">Ngoc Phan</h3>
                                  <p class="font-mono text-xs text-parchment/50 mt-2 uppercase tracking-widest flex items-center">
                                     Click to Reveal Story <span class="ml-2 text-lg">↻</span>
                                  </p>
                             </div>
                         </div>
                         <!-- Back -->
-                        <div class="flip-back absolute w-full h-full bg-[#1a2e25] border border-white/10 p-12 flex flex-col justify-center items-start text-left">
-                            <h4 class="font-serif text-2xl italic text-white mb-6">"To archive is to remember who we are."</h4>
+                        <div class="flip-back absolute w-full h-full bg-[#1a2e25] border border-white/10 p-8 md:p-12 flex flex-col justify-center items-start text-left">
+                            <h4 class="font-serif text-xl md:text-2xl italic text-white mb-6">"To archive is to remember who we are."</h4>
                             <p class="font-mono text-xs text-parchment/80 leading-relaxed mb-8">
-                                Growing up in the rapidly modernizing streets of Hanoi, Phan felt a disconnect from his heritage. He turned to archival work not just to organize history, but to find his own roots—bridging the gap between ancient traditions and the digital age.
+                                Growing up in the rapidly modernizing streets of Hanoi, Phan felt a disconnect from his heritage. He turned to archival work not just to organize history, but to find his own roots.
                             </p>
                             <div class="w-full h-[1px] bg-white/20 mb-8"></div>
                             <div class="grid grid-cols-2 gap-4 w-full">
@@ -1004,7 +957,7 @@
                 </div>
 
                 <!-- Flip Card 2: Diep Chi -->
-                <div class="flip-card h-[80vh] w-full group mt-24 md:mt-0 hoverable">
+                <div class="flip-card h-[60vh] md:h-[80vh] w-full group mt-8 md:mt-0 hoverable">
                     <div class="flip-inner relative w-full h-full transition-transform duration-700">
                         <!-- Front -->
                         <div class="flip-front absolute w-full h-full bg-[#0A192F] border border-white/10 overflow-hidden">
@@ -1012,17 +965,17 @@
                                  onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop'"
                                  class="w-full h-full object-cover transition-all duration-700 grayscale group-hover:grayscale-0" alt="Diep Chi">
                             <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-dark to-transparent">
-                                 <h3 class="font-serif text-4xl italic text-white">Diep Chi</h3>
+                                 <h3 class="font-serif text-3xl md:text-4xl italic text-white">Diep Chi</h3>
                                  <p class="font-mono text-xs text-parchment/50 mt-2 uppercase tracking-widest flex items-center">
                                     Click to Reveal Story <span class="ml-2 text-lg">↻</span>
                                  </p>
                             </div>
                         </div>
                         <!-- Back -->
-                        <div class="flip-back absolute w-full h-full bg-[#3d2b1f] border border-white/10 p-12 flex flex-col justify-center items-start text-left">
-                            <h4 class="font-serif text-2xl italic text-white mb-6">"Art is the memory of the land."</h4>
+                        <div class="flip-back absolute w-full h-full bg-[#3d2b1f] border border-white/10 p-8 md:p-12 flex flex-col justify-center items-start text-left">
+                            <h4 class="font-serif text-xl md:text-2xl italic text-white mb-6">"Art is the memory of the land."</h4>
                             <p class="font-mono text-xs text-parchment/80 leading-relaxed mb-8">
-                                Born amidst the endless rice paddies of the South, Diep Chi found beauty in the everyday. Her art evolved from childhood sketches in the mud to sophisticated visual storytelling, capturing the vibrant soul of the Mekong Delta.
+                                Born amidst the endless rice paddies of the South, Diep Chi found beauty in the everyday. Her art evolved from childhood sketches in the mud to sophisticated visual storytelling.
                             </p>
                             <div class="w-full h-[1px] bg-white/20 mb-8"></div>
                             <div class="grid grid-cols-2 gap-4 w-full">
@@ -1043,38 +996,38 @@
         </div>
     </section>
 
-    <!-- 06. IMPACT (Updated with 3D Globe) -->
-    <section id="impact" class="relative min-h-screen bg-[#112240] py-32 vertical-section overflow-hidden">
+    <!-- 08. IMPACT -->
+    <section id="impact" class="relative min-h-screen bg-[#112240] py-20 md:py-32 vertical-section overflow-hidden">
         <!-- 3D Canvas -->
         <div id="impact-canvas"></div>
 
-        <div class="max-w-5xl w-full mx-auto relative z-10">
+        <div class="max-w-5xl w-full mx-auto relative z-10 px-4 md:px-0">
              <div class="font-mono text-accent text-xs mb-12 opacity-60">06 — Our Impact</div>
              
-             <div class="impact-graph mb-16 backdrop-blur-md bg-[#0A192F]/50 p-6 rounded-lg border border-white/5">
-                 <div class="flex justify-between items-end font-serif text-xl md:text-3xl text-white">
-                     <span class="max-w-xs md:max-w-none">Vietnamese Ethnic Groups to be Documented</span>
-                     <span class="stat-number text-white" data-target="54">0</span>
+             <div class="impact-graph mb-8 md:mb-16 backdrop-blur-md bg-[#0A192F]/50 p-4 md:p-6 rounded-lg border border-white/5">
+                 <div class="flex flex-col md:flex-row justify-between md:items-end font-serif text-lg md:text-3xl text-white">
+                     <span class="max-w-xs md:max-w-none">Vietnamese Ethnic Groups</span>
+                     <span class="stat-number text-white mt-2 md:mt-0" data-target="54">0</span>
                  </div>
                  <div class="bar-container">
                      <div class="bar-fill" data-width="54%"></div>
                  </div>
              </div>
 
-             <div class="impact-graph mb-16 backdrop-blur-md bg-[#0A192F]/50 p-6 rounded-lg border border-white/5">
-                 <div class="flex justify-between items-end font-serif text-xl md:text-3xl text-white">
-                     <span>Content to be spread and delivered</span>
-                     <span class="stat-number text-white" data-target="100" data-suffix="%">0</span>
+             <div class="impact-graph mb-8 md:mb-16 backdrop-blur-md bg-[#0A192F]/50 p-4 md:p-6 rounded-lg border border-white/5">
+                 <div class="flex flex-col md:flex-row justify-between md:items-end font-serif text-lg md:text-3xl text-white">
+                     <span>Content Delivery</span>
+                     <span class="stat-number text-white mt-2 md:mt-0" data-target="100" data-suffix="%">0</span>
                  </div>
                  <div class="bar-container">
                      <div class="bar-fill" data-width="100%"></div>
                  </div>
              </div>
 
-             <div class="impact-graph backdrop-blur-md bg-[#0A192F]/50 p-6 rounded-lg border border-white/5">
-                 <div class="flex justify-between items-end font-serif text-xl md:text-3xl text-white">
-                     <span class="max-w-xl">Passion and Effort Dedicated to Preserving Cultures and Traditions</span>
-                     <span class="stat-number text-white" data-target="Infinite">Infinite</span>
+             <div class="impact-graph backdrop-blur-md bg-[#0A192F]/50 p-4 md:p-6 rounded-lg border border-white/5">
+                 <div class="flex flex-col md:flex-row justify-between md:items-end font-serif text-lg md:text-3xl text-white">
+                     <span class="max-w-xl">Passion & Dedication</span>
+                     <span class="stat-number text-white mt-2 md:mt-0" data-target="Infinite">Infinite</span>
                  </div>
                  <div class="bar-container">
                      <div class="bar-fill" data-width="100%"></div>
@@ -1083,18 +1036,18 @@
         </div>
     </section>
 
-    <!-- 07. NEW INTERACTIVE EXPERIENCE SECTION -->
-    <section id="game-experience" class="min-h-screen bg-gradient-to-t from-[#020c1b] to-[#112240] flex items-center justify-center relative overflow-hidden">
+    <!-- 09. INTERACTIVE EXPERIENCE -->
+    <section id="game-experience" class="min-h-screen bg-gradient-to-t from-[#020c1b] to-[#112240] flex items-center justify-center relative overflow-hidden py-20">
         
         <!-- Animated Grid Background -->
         <div class="absolute inset-0 z-0" style="background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 50px 50px; opacity: 0.1;"></div>
         
-        <div class="max-w-6xl w-full px-8 relative z-10 flex flex-col md:flex-row items-center gap-20">
+        <div class="max-w-6xl w-full px-4 md:px-8 relative z-10 flex flex-col md:flex-row items-center gap-10 md:gap-20">
             
             <!-- Left Text Content -->
-            <div class="md:w-1/2 space-y-8 game-content opacity-0 translate-y-20">
+            <div class="w-full md:w-1/2 space-y-8 game-content opacity-0 translate-y-20">
                 <div class="font-mono text-accent text-xs opacity-60 uppercase tracking-widest">07 — Interactive Experience</div>
-                <h2 class="font-serif text-5xl md:text-7xl italic text-white leading-tight">
+                <h2 class="font-serif text-4xl md:text-7xl italic text-white leading-tight">
                     Discover Vietnam <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-white">Through Play</span>
                 </h2>
                 <p class="font-mono text-sm text-parchment/70 leading-relaxed">
@@ -1107,7 +1060,7 @@
             </div>
 
             <!-- Right Visual Card -->
-            <div class="md:w-1/2 game-visual opacity-0 translate-y-20">
+            <div class="w-full md:w-1/2 game-visual opacity-0 translate-y-20">
                 <div class="game-card w-full aspect-square rounded-2xl p-2 relative group hoverable">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                     <div class="w-full h-full rounded-xl overflow-hidden relative border border-white/10">
@@ -1134,8 +1087,8 @@
         </div>
     </section>
 
-    <!-- 08. SOCIAL MEDIA & FOOTER -->
-    <section id="socials" class="min-h-[80vh] bg-[#020c1b] relative flex flex-col justify-center items-center border-t border-white/10 overflow-hidden">
+    <!-- 10. SOCIAL MEDIA & FOOTER -->
+    <section id="socials" class="min-h-[80vh] bg-[#020c1b] relative flex flex-col justify-center items-center border-t border-white/10 overflow-hidden py-20">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center pointer-events-none opacity-[0.03]">
              <h1 class="text-[20vw] font-serif italic text-white leading-none">Connect</h1>
         </div>
@@ -1143,25 +1096,25 @@
         <div class="z-10 w-full max-w-4xl px-8 flex flex-col items-center">
             
             <!-- BRANDING: Big Footer Logo -->
-            <img src="https://files.catbox.moe/kr9py2.png" class="h-24 w-auto mb-8 opacity-50 hover:opacity-100 transition-opacity duration-500" alt="Footer Logo">
+            <img src="https://files.catbox.moe/kr9py2.png" class="h-16 md:h-24 w-auto mb-8 opacity-50 hover:opacity-100 transition-opacity duration-500" alt="Footer Logo">
 
             <div class="font-mono text-accent text-xs mb-12 opacity-60 text-center uppercase tracking-widest">Join the Community</div>
             <div class="flex flex-col items-center space-y-6 w-full">
                 <!-- Social Links -->
                 <a href="https://www.instagram.com/aether.co.39?igsh=c3Joemc3cjk4cHA0" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
-                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">Instagram</span>
+                    <span class="font-serif text-2xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">Instagram</span>
                     <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                 </a>
                 <a href="https://www.tiktok.com/@aethertravelco39" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
-                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">TikTok</span>
+                    <span class="font-serif text-2xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">TikTok</span>
                     <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>
                 </a>
                  <a href="https://www.facebook.com/share/14X8pTjszfm/?mibextid=wwXIfr" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
-                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">Facebook</span>
+                    <span class="font-serif text-2xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">Facebook</span>
                     <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
                 </a>
                 <a href="https://www.youtube.com/@aether.co.39" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
-                    <span class="font-serif text-4xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">YouTube</span>
+                    <span class="font-serif text-2xl md:text-6xl italic text-white group-hover:pl-4 transition-all duration-500">YouTube</span>
                     <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
                 </a>
             </div>
@@ -1175,14 +1128,12 @@
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
 
     <script>
-        // CHANGED: Use DOMContentLoaded for instant "fake" load start, instead of waiting for assets
         document.addEventListener('DOMContentLoaded', () => {
             // ROBUST LOADER & AUDIO LOGIC
-            // Declare loadingProgress at the very top of the scope to prevent ReferenceErrors
             let loadingProgress = 0; 
             
             const loader = document.getElementById('loader');
-            const loaderLine = document.querySelector('.loader-line'); // RESTORED
+            const loaderLine = document.querySelector('.loader-line');
             const loaderStatus = document.getElementById('loader-status');
             const loaderPercent = document.getElementById('loader-percent');
             const enterButton = document.getElementById('enter-button');
@@ -1190,28 +1141,14 @@
             const soundBtn = document.getElementById('sound-toggle');
             const loaderTitleText = document.getElementById('loader-title-text');
 
-            // --- AUDIO FIXES START ---
-            
-            // 1. Force Load Immediately
+            // --- AUDIO LOGIC ---
             bgMusic.load();
             bgMusic.volume = 0.5;
 
-            // 2. Sync Visuals to Actual Play State (Fixes "Plays then Pauses" visual bug)
-            // If the audio pauses (buffering or interrupted), stop the visualizer
-            bgMusic.addEventListener('pause', () => {
-                soundBtn.classList.remove('playing');
-            });
-            // If audio starts playing, start the visualizer
-            bgMusic.addEventListener('play', () => {
-                soundBtn.classList.add('playing');
-            });
-            // Loop handler just in case
-            bgMusic.addEventListener('ended', () => {
-                bgMusic.currentTime = 0;
-                bgMusic.play();
-            });
+            bgMusic.addEventListener('pause', () => soundBtn.classList.remove('playing'));
+            bgMusic.addEventListener('play', () => soundBtn.classList.add('playing'));
+            bgMusic.addEventListener('ended', () => { bgMusic.currentTime = 0; bgMusic.play(); });
 
-            // Toggle Sound Button Logic
             soundBtn.addEventListener('click', () => {
                 if (bgMusic.paused) {
                     bgMusic.play().catch(e => console.log("Play prevented:", e));
@@ -1220,8 +1157,6 @@
                 }
             });
             
-            // --- AUDIO FIXES END ---
-
             // TYPEWRITER EFFECT FOR TITLE
             const titleString = "Aether";
             let charIndex = 0;
@@ -1229,31 +1164,27 @@
                 if (charIndex < titleString.length) {
                     loaderTitleText.innerHTML += titleString.charAt(charIndex);
                     charIndex++;
-                    setTimeout(typeWriter, 200); // Speed of typing
+                    setTimeout(typeWriter, 200);
                 }
             }
-            // Start typing immediately
             setTimeout(typeWriter, 500);
 
-            // CURSOR INITIALIZATION (Immediately active on Loader)
-            const cursor = document.getElementById('custom-cursor');
-            const trails = document.querySelectorAll('.cursor-trail');
-            
-            document.addEventListener('mousemove', (e) => {
-                gsap.to(cursor, { 
-                    x: e.clientX, 
-                    y: e.clientY, 
-                    duration: 0.1 
-                });
-                trails.forEach((trail, index) => {
-                    gsap.to(trail, {
-                        x: e.clientX,
-                        y: e.clientY,
-                        duration: 0.2 + (index * 0.1), 
-                        ease: "power2.out"
+            // CURSOR INITIALIZATION (Only enabled if mouse is detected)
+            if (window.matchMedia("(pointer: fine)").matches) {
+                const cursor = document.getElementById('custom-cursor');
+                const trails = document.querySelectorAll('.cursor-trail');
+                
+                document.addEventListener('mousemove', (e) => {
+                    gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+                    trails.forEach((trail, index) => {
+                        gsap.to(trail, {
+                            x: e.clientX, y: e.clientY,
+                            duration: 0.2 + (index * 0.1), 
+                            ease: "power2.out"
+                        });
                     });
                 });
-            });
+            }
 
             // HOVER EFFECTS INITIALIZATION
             const applyHoverEffects = () => {
@@ -1265,41 +1196,30 @@
             };
             applyHoverEffects();
             
-
             // Enter Site
             enterButton.addEventListener('click', () => {
                 loader.classList.add('hidden');
                 document.body.classList.remove('loading');
                 initSiteAnimations();
                 
-                // Play Audio with Promise Handling
                 const playPromise = bgMusic.play();
                 if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        // Play started successfully
-                        // Visuals handled by 'play' event listener above
-                    })
-                    .catch(error => {
-                        console.log("Audio autoplay prevented or interrupted", error);
-                        // Visuals handled by 'pause' event listener above
-                    });
+                    playPromise.catch(error => console.log("Audio autoplay prevented", error));
                 }
             });
             
-            // NEW: FAKE LOADER LOGIC (2 Seconds Fixed)
-            const duration = 5000; // 5 seconds exactly
+            // FAKE LOADER LOGIC
+            const duration = 4000; 
             const startTime = Date.now();
-            const messages = ["Initializing Core", "Decrypting Archives", "Loading 3D Assets", "Mapping Traditions", "Awaiting Input"];
+            const messages = ["Initializing Core", "Decrypting Archives", "Loading Assets", "Mapping Traditions", "Awaiting Input"];
             
             const interval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
-                // Update the scope-safe variable
                 loadingProgress = Math.min((elapsed / duration) * 100, 100);
                 
-                loaderLine.style.width = loadingProgress + '%'; // RESTORED
+                loaderLine.style.width = loadingProgress + '%'; 
                 loaderPercent.innerText = Math.floor(loadingProgress) + '%';
                 
-                // Map progress to messages based on timeline
                 if (loadingProgress < 25) loaderStatus.innerText = messages[0];
                 else if (loadingProgress < 50) loaderStatus.innerText = messages[1];
                 else if (loadingProgress < 75) loaderStatus.innerText = messages[2];
@@ -1308,13 +1228,15 @@
 
                 if (loadingProgress >= 100) {
                     clearInterval(interval);
-                    enterButton.classList.add('visible'); // Show enter button
+                    enterButton.classList.add('visible'); 
                     applyHoverEffects();
                 }
-            }, 30); // 30ms update rate for smoothness
+            }, 30);
 
-            // THREE.JS LOGIC
-            initThreeJS();
+            // THREE.JS LOGIC - ONLY ON LAPTOPS/LARGE SCREENS TO SAVE MOBILE BATTERY
+            if (window.innerWidth > 768) {
+                initThreeJS();
+            }
         });
 
         function initThreeJS() {
@@ -1376,30 +1298,14 @@
             valuesRenderer.setSize(window.innerWidth, window.innerHeight);
             valuesContainer.appendChild(valuesRenderer.domElement);
             
-            // Create scattered small shapes
             const shards = [];
-            const shardCount = 15;
-            
-            for (let i = 0; i < shardCount; i++) {
+            for (let i = 0; i < 15; i++) {
                 const size = (Math.random() * 0.3) + 0.1;
                 const shardGeo = new THREE.TetrahedronGeometry(size);
-                const shardMat = new THREE.MeshBasicMaterial({ 
-                    color: 0x88ccff, 
-                    wireframe: true, 
-                    transparent: true, 
-                    opacity: 0.3 
-                });
+                const shardMat = new THREE.MeshBasicMaterial({ color: 0x88ccff, wireframe: true, transparent: true, opacity: 0.3 });
                 const shard = new THREE.Mesh(shardGeo, shardMat);
-                
-                shard.position.x = (Math.random() - 0.5) * 15;
-                shard.position.y = (Math.random() - 0.5) * 20; 
-                shard.position.z = (Math.random() - 0.5) * 5;
-                
-                shard.userData = {
-                    rotX: (Math.random() - 0.5) * 0.02,
-                    rotY: (Math.random() - 0.5) * 0.02
-                };
-                
+                shard.position.set((Math.random() - 0.5) * 15, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 5);
+                shard.userData = { rotX: (Math.random() - 0.5) * 0.02, rotY: (Math.random() - 0.5) * 0.02 };
                 valuesScene.add(shard);
                 shards.push(shard);
             }
@@ -1414,18 +1320,11 @@
             impactRenderer.setSize(window.innerWidth, window.innerHeight);
             impactContainer.appendChild(impactRenderer.domElement);
             
-            // Creating a "Data Globe" using points
             const globeGeo = new THREE.SphereGeometry(1.2, 64, 64);
-            const globeMat = new THREE.PointsMaterial({
-                size: 0.005,
-                color: 0x4fc3f7, // Light blue data color
-                transparent: true,
-                opacity: 0.4
-            });
+            const globeMat = new THREE.PointsMaterial({ size: 0.005, color: 0x4fc3f7, transparent: true, opacity: 0.4 });
             const globePoints = new THREE.Points(globeGeo, globeMat);
             impactScene.add(globePoints);
             
-            // Add "Connection Lines" roughly wrapping sphere
             const connectionGeo = new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.3, 1));
             const connectionMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.05 });
             const connections = new THREE.LineSegments(connectionGeo, connectionMat);
@@ -1433,11 +1332,8 @@
 
 
             // ANIMATION LOOP
-            let mouseX = 0;
-            let mouseY = 0;
-            let targetX = 0;
-            let targetY = 0;
-
+            let mouseX = 0; let mouseY = 0;
+            let targetX = 0; let targetY = 0;
             const windowHalfX = window.innerWidth / 2;
             const windowHalfY = window.innerHeight / 2;
 
@@ -1452,7 +1348,6 @@
                 requestAnimationFrame(animate);
                 const elapsedTime = clock.getElapsedTime();
 
-                // Hero Animation
                 targetX = mouseX * 0.001;
                 targetY = mouseY * 0.001;
 
@@ -1460,12 +1355,10 @@
                 particlesMesh.rotation.x += 0.05 * (targetY - particlesMesh.rotation.x);
                 particlesMesh.rotation.z += 0.001; 
 
-                // Artifact Animation
                 line.rotation.x += 0.002;
                 line.rotation.y += 0.003;
                 line.position.y = Math.sin(elapsedTime * 0.5) * 0.1;
                 
-                // Values Animation
                 shards.forEach(shard => {
                     shard.rotation.x += shard.userData.rotX;
                     shard.rotation.y += shard.userData.rotY;
@@ -1473,7 +1366,6 @@
                     shard.position.x += (mouseX * 0.0001 - shard.position.x * 0.01) * 0.1;
                 });
                 
-                // Impact Globe Animation
                 globePoints.rotation.y += 0.002;
                 connections.rotation.y -= 0.001;
                 globePoints.rotation.x = Math.sin(elapsedTime * 0.2) * 0.1;
@@ -1490,21 +1382,13 @@
                 const width = window.innerWidth;
                 const height = window.innerHeight;
                 
-                heroCamera.aspect = width / height;
-                heroCamera.updateProjectionMatrix();
-                heroRenderer.setSize(width, height);
-
-                artifactCamera.aspect = width / height;
-                artifactCamera.updateProjectionMatrix();
-                artifactRenderer.setSize(width, height);
-                
-                valuesCamera.aspect = width / height;
-                valuesCamera.updateProjectionMatrix();
-                valuesRenderer.setSize(width, height);
-                
-                impactCamera.aspect = width / height;
-                impactCamera.updateProjectionMatrix();
-                impactRenderer.setSize(width, height);
+                [heroCamera, artifactCamera, valuesCamera, impactCamera].forEach(cam => {
+                    cam.aspect = width / height;
+                    cam.updateProjectionMatrix();
+                });
+                [heroRenderer, artifactRenderer, valuesRenderer, impactRenderer].forEach(rend => {
+                    rend.setSize(width, height);
+                });
             });
         }
 
@@ -1514,263 +1398,384 @@
             const lenis = new Lenis({ duration: 1.2, smoothWheel: true });
             function raf(time) { lenis.raf(time); requestAnimationFrame(raf); }
             requestAnimationFrame(raf);
+            
+            // Hero Zoom Out Effect
+            gsap.to(".parallax-img", {
+                scale: 1, // Zooms out from initial CSS scale 1.2
+                scrollTrigger: { 
+                    trigger: "header", 
+                    start: "top top", 
+                    end: "bottom top", 
+                    scrub: true 
+                },
+                ease: "none"
+            });
 
             gsap.from("#hero-title", { opacity: 0, y: 100, duration: 2, ease: "expo.out", delay: 0.5 });
             gsap.from("#hero-sub", { opacity: 0, letterSpacing: "0em", duration: 2, ease: "expo.out", delay: 0.8 });
             
-            // MANIFESTO SCROLL REVEAL (High-End Scrub)
+            // MANIFESTO SCROLL REVEAL (FONT CHANGE REMOVED)
             const manifestoContainer = document.getElementById('manifesto-container');
             const text = manifestoContainer.innerText;
             const words = text.split(" ");
+            
             manifestoContainer.innerHTML = "";
             
             words.forEach(word => {
                 const span = document.createElement("span");
-                span.innerText = word + " "; // Add space back
-                span.className = "manifesto-word"; // Use style class
+                span.innerText = word + " "; 
+                // All words get the same class now
+                span.className = "manifesto-word"; 
                 manifestoContainer.appendChild(span);
             });
             
-            // Create a Timeline for the pinned scrub effect
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: ".manifesto-section",
-                    start: "top top",   // Start pinning immediately
-                    end: "+=1500",      // Pin for 1500px of scroll
-                    pin: true,          // Pin the container
-                    scrub: 1,           // Smooth scrubbing (1s lag)
-                }
-            });
+            // GSAP MATCH MEDIA: Different Logic for Laptop vs Mobile
+            ScrollTrigger.matchMedia({
+                
+                // LAPTOP / DESKTOP (> 768px)
+                "(min-width: 769px)": function() {
+                    // Pinned Manifesto
+                    const tl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: ".manifesto-section",
+                            start: "top top",
+                            end: "+=1500",
+                            pin: true,
+                            scrub: 1,
+                        }
+                    });
+                    tl.to(".manifesto-word", { opacity: 1, y: 0, color: "#FFFFFF", stagger: 0.1, ease: "none" });
+                    
+                    // Uncovering History Zoom Effect (Artifacts)
+                    gsap.fromTo(".zoom-container",
+                        { scale: 3 }, // Start zoomed in
+                        {
+                            scale: 1, // Zoom out to normal
+                            scrollTrigger: {
+                                trigger: "#artifacts",
+                                start: "top top",
+                                end: "bottom bottom",
+                                scrub: true
+                            },
+                            ease: "power2.out"
+                        }
+                    );
 
-            // Animate words staggered by scroll position
-            tl.to(".manifesto-word", {
-                opacity: 1,
-                y: 0,
-                color: "#FFFFFF",
-                stagger: 0.1,
-                ease: "none" // Linear ease for direct mapping to scroll
-            });
+                    // NEW ANIMATION 1: Artifact 3D Levitation
+                    gsap.utils.toArray('.artifact-card').forEach((card, i) => {
+                        gsap.to(card, {
+                            scrollTrigger: { trigger: card, scrub: 1 },
+                            y: -50,
+                            rotationY: i % 2 === 0 ? 10 : -10, // Subtle 3D rotation
+                            ease: "none"
+                        });
+                    });
 
-            gsap.to(".parallax-img", {
-                scrollTrigger: { trigger: "header", start: "top top", end: "bottom top", scrub: true },
-                y: 150, ease: "none"
-            });
-            gsap.utils.toArray('.chapter').forEach(chapter => {
-                gsap.from(chapter, {
-                    scrollTrigger: { trigger: chapter, start: "top 80%", end: "top 40%", scrub: true },
-                    opacity: 0, x: 50
-                });
-            });
+                     // NEW ANIMATION 2: Signature Draw-in
+                    gsap.from(".font-signature", {
+                        scrollTrigger: { trigger: ".font-signature", start: "top 80%" },
+                        opacity: 0,
+                        filter: "blur(20px)",
+                        scale: 1.5,
+                        duration: 1.5,
+                        stagger: 0.2,
+                        ease: "power2.out"
+                    });
 
-            gsap.fromTo(".zoom-container", { scale: 2 }, {
-                scale: 1,
-                scrollTrigger: { trigger: "#artifacts", start: "top top", end: "bottom bottom", scrub: true }
-            });
-            gsap.to(".zoom-caption", {
-                scrollTrigger: { trigger: "#artifacts", start: "70% center", end: "90% center", scrub: true },
-                opacity: 1
-            });
 
-            const track = document.querySelector('.horizontal-track');
-            const outer = document.querySelector('.horizontal-outer');
-            
-            function getScrollAmount() { return -(track.scrollWidth - window.innerWidth); }
-            
-            // Main Horizontal Scroll Pin
-            const hScroll = gsap.to(track, {
-                x: getScrollAmount,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: ".horizontal-outer",
-                    start: "top top",
-                    end: () => `+=${getScrollAmount() * -1.5}`,
-                    pin: true,
-                    scrub: 1,
-                    invalidateOnRefresh: true,
-                }
-            });
-            
-            // Separate Tween for Background Color linked to the SAME scroll distance
-            gsap.fromTo(".horizontal-outer", 
-                { backgroundColor: "#2a231d" }, 
-                { 
-                    backgroundColor: "#0A192F",
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: ".horizontal-outer",
-                        start: "top top",
-                        end: () => `+=${getScrollAmount() * -1.5}`, // Same end point as the scroll
-                        scrub: true
+                    // Horizontal Gallery Scroll (Adjusted Width) & NEW ANIMATION 3: Velocity Skew
+                    const track = document.querySelector('.horizontal-track');
+                    function getScrollAmount() { return -(track.scrollWidth - window.innerWidth); }
+                    
+                    // Proxy for Skew Physics
+                    let proxy = { skew: 0 },
+                        skewSetter = gsap.quickSetter(".horizontal-track img", "skewX", "deg"),
+                        clamp = gsap.utils.clamp(-15, 15);
+
+                    const scrollTween = gsap.to(track, {
+                        x: getScrollAmount,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: ".horizontal-outer",
+                            start: "top top",
+                            end: () => `+=${getScrollAmount() * -1}`,
+                            pin: true,
+                            scrub: 1,
+                            invalidateOnRefresh: true,
+                            onUpdate: (self) => {
+                                // Calculate skew based on scroll velocity
+                                let skew = clamp(self.getVelocity() / -200);
+                                if (Math.abs(skew) > Math.abs(proxy.skew)) {
+                                    proxy.skew = skew;
+                                    gsap.to(proxy, {
+                                        skew: 0, 
+                                        duration: 0.5, 
+                                        ease: "power3", 
+                                        overwrite: true, 
+                                        onUpdate: () => skewSetter(proxy.skew)
+                                    });
+                                }
+                            }
+                        }
+                    });
+                    
+                     gsap.fromTo(".horizontal-outer", 
+                        { backgroundColor: "#2a231d" }, 
+                        { 
+                            backgroundColor: "#0A192F",
+                            ease: "none",
+                            scrollTrigger: {
+                                trigger: ".horizontal-outer",
+                                start: "top top",
+                                end: () => `+=${getScrollAmount() * -1}`,
+                                scrub: true
+                            }
+                        }
+                    );
+                },
+
+                // MOBILE (< 768px)
+                "(max-width: 768px)": function() {
+                    // Simple Fade In for Manifesto (No Pinning)
+                    gsap.to(".manifesto-word", {
+                        opacity: 1, y: 0, color: "#FFFFFF", stagger: 0.05, ease: "none",
+                        scrollTrigger: {
+                            trigger: ".manifesto-section",
+                            start: "top 70%",
+                            end: "bottom 70%",
+                            scrub: 1
+                        }
+                    });
+
+                    // No Horizontal Scroll - Items are stacked via CSS, just animate entrance
+                    gsap.utils.toArray('.horizontal-track > div').forEach(item => {
+                         gsap.from(item, {
+                             y: 50, opacity: 0,
+                             scrollTrigger: { trigger: item, start: "top 85%" }
+                         });
+                    });
+                },
+
+                // SHARED ANIMATIONS
+                "all": function() {
+                    gsap.to(".parallax-img", {
+                        scrollTrigger: { trigger: "header", start: "top top", end: "bottom top", scrub: true },
+                        y: 150, ease: "none"
+                    });
+                    gsap.utils.toArray('.chapter').forEach(chapter => {
+                        gsap.from(chapter, {
+                            scrollTrigger: { trigger: chapter, start: "top 80%", end: "top 40%", scrub: true },
+                            opacity: 0, x: 50
+                        });
+                    });
+
+                    // NEW ANIMATION 4: Values Icon Elastic Pop - FIXED VISIBILITY
+                    // We trigger on the individual .value-item for better reliability
+                    gsap.utils.toArray('.value-item').forEach((item) => {
+                        const icon = item.querySelector('.value-icon');
+                        if(icon) {
+                             gsap.fromTo(icon, 
+                                { scale: 0, rotation: -180, opacity: 0 }, 
+                                {
+                                    scrollTrigger: { trigger: item, start: "top 85%" },
+                                    scale: 1,
+                                    rotation: 0,
+                                    opacity: 1,
+                                    duration: 1.2,
+                                    ease: "elastic.out(1, 0.5)"
+                                }
+                            );
+                        }
+                    });
+
+                    // Voices Cards Entrance - NEW ANIMATION 5: 3D Tilt Entrance - FIXED INITIAL STATE
+                    // Set initial state immediately to avoid flashing
+                    gsap.set(".flip-card", { transformPerspective: 1000, transformOrigin: "center bottom" });
+                    
+                    gsap.fromTo(".flip-card", 
+                        { rotationX: 80, opacity: 0, y: 100, z: -100 },
+                        {
+                            scrollTrigger: { trigger: "#voices", start: "top 70%" },
+                            rotationX: 0, 
+                            opacity: 1, 
+                            y: 0, 
+                            z: 0,
+                            duration: 1.5,
+                            stagger: 0.2,
+                            ease: "power3.out"
+                        }
+                    );
+                    
+                    // Social Links Entrance
+                    gsap.from(".social-link", {
+                        scrollTrigger: { trigger: "#socials", start: "top 85%" },
+                        x: -50, opacity: 0, duration: 1, stagger: 0.15, ease: "power2.out"
+                    });
+
+                    // >>> IMPACT SECTION PINNED ANIMATION <<<
+                    // Pin the section while elements assemble
+                    
+                    // Create a timeline that pins the section
+                    const impactTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: "#impact",
+                            start: "top top",
+                            end: "+=1500", // Pin for 1500px of scrolling
+                            pin: true,
+                            scrub: 1,
+                            anticipatePin: 1
+                        }
+                    });
+
+                    // 1. Staggered 3D Block Reveal inside the pinned timeline
+                    const graphs = gsap.utils.toArray('.impact-graph');
+                    impactTl.fromTo(graphs, 
+                        { 
+                            x: (i) => i % 2 === 0 ? -100 : 100, 
+                            opacity: 0, 
+                            rotationX: 45,
+                            scale: 0.8,
+                            filter: "blur(10px)"
+                        },
+                        {
+                            x: 0,
+                            opacity: 1,
+                            rotationX: 0,
+                            scale: 1,
+                            filter: "blur(0px)",
+                            ease: "power2.out",
+                            stagger: 0.2,
+                            duration: 5 // Relative duration in the scrub
+                        }
+                    );
+
+                    // 2. Bar Growth inside timeline
+                    const fills = document.querySelectorAll('.bar-fill');
+                    impactTl.fromTo(fills, 
+                        { width: "0%" },
+                        { 
+                            width: (i, el) => el.getAttribute('data-width'),
+                            duration: 4,
+                            ease: "power2.out"
+                        },
+                        "<+=1" // Start slightly after graphs start appearing
+                    );
+
+                    // 3. Number counting (Triggered separately to run in real-time once visible)
+                    const numberElements = document.querySelectorAll('.stat-number');
+                    numberElements.forEach(num => {
+                        const rawTarget = num.getAttribute('data-target');
+                        const suffix = num.getAttribute('data-suffix') || '';
+                        
+                        if (!isNaN(parseInt(rawTarget))) {
+                             const targetNum = parseInt(rawTarget);
+                             gsap.fromTo(num, 
+                                { innerText: 0 },
+                                {
+                                    scrollTrigger: { trigger: num, start: "top 80%" }, // Trigger when visible during pin
+                                    innerText: targetNum,
+                                    duration: 2,
+                                    snap: { innerText: 1 },
+                                    ease: "power3.out",
+                                    onUpdate: function() { 
+                                        this.targets()[0].innerHTML = Math.ceil(this.targets()[0].innerText).toLocaleString() + suffix; 
+                                    }
+                                }
+                             );
+                        }
+                    });
+
+
+                    // >>> GAME EXPERIENCE PINNED ANIMATION <<<
+                    
+                    // 1. Content Collision (Text from Left, Card from Right/Vortex)
+                    const gameContent = document.querySelector('.game-content');
+                    const gameVisual = document.querySelector('.game-visual');
+                    const gameCard = document.querySelector('.game-card');
+
+                    // Setup Timeline linked to scroll and PIN
+                    const gameTl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: "#game-experience",
+                            start: "top top", // Start when section hits top
+                            end: "+=1200",    // Pin for 1200px
+                            pin: true,
+                            scrub: 1
+                        }
+                    });
+
+                    // Text enters from left
+                    gameTl.fromTo(gameContent, 
+                        { x: -100, opacity: 0, filter: "blur(10px)" },
+                        { x: 0, opacity: 1, filter: "blur(0px)", ease: "power2.out", duration: 5 }
+                    );
+
+                    // Card enters via Vortex (Scale + Rotation)
+                    gameTl.fromTo(gameVisual,
+                        { scale: 0.2, rotation: -90, opacity: 0, x: 200 },
+                        { scale: 1, rotation: 0, opacity: 1, x: 0, ease: "power2.out", duration: 5 },
+                        "<" // Start at same time
+                    );
+                    
+                    // Continuous hover tilt effect (Mouse interaction extension)
+                    if (window.matchMedia("(min-width: 768px)").matches) {
+                        gameCard.addEventListener('mousemove', (e) => {
+                            const rect = gameCard.getBoundingClientRect();
+                            const x = e.clientX - rect.left;
+                            const y = e.clientY - rect.top;
+                            const centerX = rect.width / 2;
+                            const centerY = rect.height / 2;
+                            
+                            const rotateX = ((y - centerY) / centerY) * -10;
+                            const rotateY = ((x - centerX) / centerX) * 10;
+                            
+                            gsap.to(gameCard, {
+                                rotationX: rotateX,
+                                rotationY: rotateY,
+                                duration: 0.5,
+                                ease: "power2.out"
+                            });
+                        });
+                        
+                        gameCard.addEventListener('mouseleave', () => {
+                            gsap.to(gameCard, { rotationX: 0, rotationY: 0, duration: 0.5 });
+                        });
                     }
-                }
-            );
 
-            const connector = document.getElementById('values-connector');
-            const length = connector.getTotalLength();
-            
-            connector.style.strokeDasharray = length;
-            connector.style.strokeDashoffset = length;
-
-            gsap.to(connector.style, {
-                strokeDashoffset: 0,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: "#values-list",
-                    start: "top center",
-                    end: "bottom center",
-                    scrub: 1
+                    // Background Color Changes
+                    ScrollTrigger.create({ trigger: ".manifesto-section", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
+                    ScrollTrigger.create({ trigger: "#journey", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0f291e" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
+                    ScrollTrigger.create({ trigger: "#artifacts", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#2a231d" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0f291e" }) });
+                    ScrollTrigger.create({ trigger: "#values-list", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
+                    ScrollTrigger.create({ trigger: "#impact", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#112240" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
+                    ScrollTrigger.create({ trigger: "#game-experience", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#020c1b" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#112240" }) });
                 }
             });
 
+            // Typewriter Effect
             const typewriters = document.querySelectorAll('.typewriter-text');
-            
             typewriters.forEach((el, index) => {
                 const text = el.getAttribute('data-text');
                 el.innerText = ''; 
-                
                 const cursorSpan = document.createElement('span');
                 cursorSpan.className = 'typewriter-cursor';
                 el.parentNode.appendChild(cursorSpan);
 
                 ScrollTrigger.create({
-                    trigger: el,
-                    start: "top 80%",
-                    once: true, 
+                    trigger: el, start: "top 80%", once: true, 
                     onEnter: () => {
-                        let i = 0;
-                        el.style.opacity = 1;
-                        
+                        let i = 0; el.style.opacity = 1;
                         const typing = setInterval(() => {
-                            if (i < text.length) {
-                                el.innerText += text.charAt(i);
-                                i++;
-                            } else {
-                                clearInterval(typing);
-                                setTimeout(() => cursorSpan.style.display = 'none', 1000);
-                            }
+                            if (i < text.length) { el.innerText += text.charAt(i); i++; } 
+                            else { clearInterval(typing); setTimeout(() => cursorSpan.style.display = 'none', 1000); }
                         }, 100); 
                     }
                 });
             });
 
-            window.addEventListener('resize', () => {
-                ScrollTrigger.refresh();
-            });
-
             document.querySelectorAll('.flip-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    card.classList.toggle('flipped');
-                });
+                card.addEventListener('click', () => { card.classList.toggle('flipped'); });
             });
-
-            gsap.from(".flip-card", {
-                scrollTrigger: {
-                    trigger: "#voices",
-                    start: "top 70%", 
-                    end: "bottom 80%",
-                },
-                y: 100,
-                opacity: 0,
-                duration: 1.2,
-                stagger: 0.3,
-                ease: "power3.out"
-            });
-
-            gsap.from(".social-link", {
-                scrollTrigger: { trigger: "#socials", start: "top 70%" },
-                x: -50, // Slight slide in from left
-                opacity: 0, 
-                duration: 1, 
-                stagger: 0.15, 
-                ease: "power2.out"
-            });
-            
-            const bars = document.querySelectorAll('.impact-graph');
-            bars.forEach(graph => {
-                const fill = graph.querySelector('.bar-fill');
-                const targetWidth = fill.getAttribute('data-width');
-                const number = graph.querySelector('.stat-number');
-                const rawTarget = number.getAttribute('data-target');
-                const suffix = number.getAttribute('data-suffix') || '';
-
-                gsap.to(fill, {
-                    scrollTrigger: { trigger: graph, start: "top 80%" },
-                    width: targetWidth, duration: 1.5, ease: "power2.out"
-                });
-
-                if (!isNaN(parseInt(rawTarget))) {
-                    const targetNum = parseInt(rawTarget);
-                    gsap.to(number, {
-                        scrollTrigger: { trigger: graph, start: "top 80%" },
-                        innerText: targetNum, 
-                        duration: 1.5, 
-                        snap: { innerText: 1 }, 
-                        ease: "power2.out",
-                        onUpdate: function() { 
-                            this.targets()[0].innerHTML = Math.ceil(this.targets()[0].innerText).toLocaleString() + suffix; 
-                        }
-                    });
-                } else {
-                    number.innerText = rawTarget;
-                    gsap.from(number, {
-                        scrollTrigger: { trigger: graph, start: "top 80%" },
-                        opacity: 0, duration: 1.5, ease: "power2.out"
-                    });
-                }
-            });
-
-            // Parallax Text in Immersive Section
-            gsap.to(".immersive-text-overlay", {
-                scrollTrigger: {
-                    trigger: ".immersive-parallax",
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: true
-                },
-                y: 200, // Move text slower than scroll
-                opacity: 1 // Changed from 0.3 to 1 for full opacity
-            });
-            
-            // New Multi-Layer Parallax
-            gsap.utils.toArray('.parallax-layer').forEach(layer => {
-                const speed = layer.getAttribute('data-speed');
-                gsap.to(layer, {
-                    y: (i, target) => ScrollTrigger.maxScroll(window) * speed * 0.1, // Controlled parallax movement
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: ".immersive-parallax",
-                        start: "top bottom",
-                        end: "bottom top",
-                        scrub: true
-                    }
-                });
-            });
-            
-            // Game Section Animations
-            gsap.to(".game-content", {
-                scrollTrigger: { trigger: "#game-experience", start: "top 70%" },
-                opacity: 1,
-                y: 0,
-                duration: 1.2,
-                ease: "power3.out"
-            });
-            
-            gsap.to(".game-visual", {
-                scrollTrigger: { trigger: "#game-experience", start: "top 70%" },
-                opacity: 1,
-                y: 0,
-                duration: 1.2,
-                delay: 0.2,
-                ease: "power3.out"
-            });
-
-
-            ScrollTrigger.create({ trigger: ".manifesto-section", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
-            ScrollTrigger.create({ trigger: "#journey", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0f291e" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
-            ScrollTrigger.create({ trigger: "#artifacts", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#2a231d" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0f291e" }) });
-            ScrollTrigger.create({ trigger: "#values-list", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#0A192F" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
-            ScrollTrigger.create({ trigger: "#impact", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#112240" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#0A192F" }) });
-            ScrollTrigger.create({ trigger: "#game-experience", start: "top center", onEnter: () => gsap.to("body", { backgroundColor: "#020c1b" }), onEnterBack: () => gsap.to("body", { backgroundColor: "#112240" }) });
         }
     </script>
 </body>
