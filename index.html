@@ -8,7 +8,12 @@
     <!-- Design Tokens & Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Standard Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Caveat:wght@400..700&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+    
+    <!-- Language Support Fonts (Chinese & Hindi) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400&family=Noto+Serif+Devanagari:wght@400;700&family=Noto+Sans+Devanagari:wght@300;400&display=swap" rel="stylesheet">
     
     <!-- Audio Preload Priority -->
     <link rel="preload" href="https://files.catbox.moe/4krw1h.mp3" as="audio">
@@ -78,6 +83,27 @@
             cursor: default; 
             overflow-x: hidden;
             transition: background-color 0.5s ease;
+        }
+
+        /* Language Specific Font Overrides */
+        body[data-lang="zh"] {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        body[data-lang="zh"] .font-serif {
+            font-family: 'Noto Serif SC', serif !important;
+        }
+        body[data-lang="zh"] .font-hand {
+            font-family: 'Noto Serif SC', serif !important; /* Fallback for handwritten */
+        }
+
+        body[data-lang="hi"] {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+        }
+        body[data-lang="hi"] .font-serif {
+            font-family: 'Noto Serif Devanagari', serif !important;
+        }
+        body[data-lang="hi"] .font-hand {
+            font-family: 'Noto Serif Devanagari', serif !important;
         }
 
         @media (hover: hover) and (pointer: fine) {
@@ -200,6 +226,11 @@
             transform: translateY(10px);
             transition: opacity 0.1s linear;
             will-change: opacity, transform;
+        }
+
+        /* Chinese Word Spacing override */
+        body[data-lang="zh"] .manifesto-word {
+            margin-right: 0.05em;
         }
 
         .loader-cursor {
@@ -527,9 +558,28 @@
         }
         .game-btn:hover::before { left: 100%; }
 
+        /* Language Switcher Styles */
+        .lang-switcher-container {
+            display: flex;
+            gap: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            z-index: 1001;
+        }
+        .lang-btn {
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            cursor: pointer;
+        }
+        .lang-btn:hover, .lang-btn.active {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
     </style>
 </head>
-<body class="font-light selection:bg-white selection:text-dark loading">
+<body class="font-light selection:bg-white selection:text-dark loading" data-lang="en">
 
     <!-- AUDIO ELEMENT -->
     <audio id="bg-music" loop preload="auto">
@@ -538,6 +588,16 @@
 
     <!-- LOADING SCREEN -->
     <div id="loader">
+        <!-- Language Switcher in Loader -->
+        <div class="absolute top-4 right-4 md:top-8 md:right-8 lang-switcher-container text-white">
+            <button class="lang-btn active" data-lang-code="en">EN</button>
+            <button class="lang-btn" data-lang-code="vi">VI</button>
+            <button class="lang-btn" data-lang-code="zh">ZH</button>
+            <button class="lang-btn" data-lang-code="hi">HI</button>
+            <button class="lang-btn" data-lang-code="fr">FR</button>
+            <button class="lang-btn" data-lang-code="es">ES</button>
+        </div>
+
         <div class="text-center relative z-20 flex flex-col items-center p-4">
             
             <!-- Container for Title & Logo (Side by Side) -->
@@ -559,7 +619,7 @@
             </div>
             
             <!-- Enter Button -->
-            <button id="enter-button" class="mt-8 px-8 py-3 border border-white/20 rounded-full font-mono text-xs hover:bg-white hover:text-dark transition-all duration-500 uppercase tracking-[0.2em] hoverable">
+            <button id="enter-button" data-i18n="clickEnter" class="mt-8 px-8 py-3 border border-white/20 rounded-full font-mono text-xs hover:bg-white hover:text-dark transition-all duration-500 uppercase tracking-[0.2em] hoverable">
                 Click to Enter
             </button>
         </div>
@@ -602,11 +662,23 @@
         <a href="#" class="block hoverable shrink-0">
             <img src="https://files.catbox.moe/kr9py2.png" alt="Aether Logo" class="h-8 md:h-12 w-auto opacity-90 hover:opacity-100 transition-opacity">
         </a>
-        <div class="flex space-x-6 md:space-x-8 overflow-x-auto pl-4 no-scrollbar whitespace-nowrap mask-nav">
-            <a href="#" class="hover:text-accent transition hoverable">Manifesto</a>
-            <a href="#journey" class="hover:text-accent transition hoverable">Journey</a>
-            <a href="#gallery" class="hover:text-accent transition hoverable">Gallery</a>
-            <a href="#game-experience" class="hover:text-accent transition hoverable">Experience</a>
+        <div class="flex items-center gap-6">
+            <div class="flex space-x-6 md:space-x-8 overflow-x-auto pl-4 no-scrollbar whitespace-nowrap mask-nav">
+                <a href="#" class="hover:text-accent transition hoverable" data-i18n="navManifesto">Manifesto</a>
+                <a href="#journey" class="hover:text-accent transition hoverable" data-i18n="navJourney">Journey</a>
+                <a href="#gallery" class="hover:text-accent transition hoverable" data-i18n="navGallery">Gallery</a>
+                <a href="#game-experience" class="hover:text-accent transition hoverable" data-i18n="navExperience">Experience</a>
+            </div>
+            
+            <!-- Navbar Language Switcher -->
+            <div class="hidden md:flex lang-switcher-container text-white/70 ml-4 border-l border-white/20 pl-4">
+                <button class="lang-btn active" data-lang-code="en">EN</button>
+                <button class="lang-btn" data-lang-code="vi">VI</button>
+                <button class="lang-btn" data-lang-code="zh">ZH</button>
+                <button class="lang-btn" data-lang-code="hi">HI</button>
+                <button class="lang-btn" data-lang-code="fr">FR</button>
+                <button class="lang-btn" data-lang-code="es">ES</button>
+            </div>
         </div>
     </nav>
 
@@ -621,9 +693,9 @@
                 <img src="https://files.catbox.moe/kr9py2.png" class="w-[80vw] h-auto grayscale" alt="Watermark">
             </div>
 
-            <div class="font-mono text-accent text-xs md:text-sm tracking-[0.3em] md:tracking-[0.5em] uppercase mb-4" id="hero-sub">Mapping the Path</div>
+            <div class="font-mono text-accent text-xs md:text-sm tracking-[0.3em] md:tracking-[0.5em] uppercase mb-4" id="hero-sub" data-i18n="heroSub">Mapping the Path</div>
             <h1 class="font-serif text-6xl md:text-9xl italic text-white mix-blend-overlay" id="hero-title">Aether</h1>
-            <div class="mt-12 opacity-50 text-xs font-mono animate-bounce text-white">Scroll to Begin</div>
+            <div class="mt-12 opacity-50 text-xs font-mono animate-bounce text-white" data-i18n="heroScroll">Scroll to Begin</div>
         </div>
         <!-- Hero Background Parallax Element -->
         <div class="absolute inset-0 z-0 opacity-40">
@@ -640,11 +712,10 @@
         <div class="absolute top-1/2 left-0 w-[800px] h-[800px] bg-forest/30 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2"></div>
         
         <div class="max-w-6xl relative z-10 px-4 md:px-8 w-full mx-auto">
-            <div class="font-mono text-accent text-xs mb-8 opacity-60">01 — Manifesto</div>
+            <div class="font-mono text-accent text-xs mb-8 opacity-60" data-i18n="manifestoTitle">01 — Manifesto</div>
             
             <div class="manifesto-text font-serif text-2xl md:text-6xl leading-tight text-parchment/90 cursor-default" id="manifesto-container">
-                <!-- Content prepared for word splitting -->
-                Our journey began with a simple belief: that cultures are living treasures, and once lost, they can never truly be replaced. In a world moving faster than ever, many indigenous and lesser-known communities are fading into silence not because they lack value, but because they lack visibility. On these values as foundation, we documented cultures into high quality videos.
+                <!-- Content injected via JS -->
             </div>
         </div>
     </section>
@@ -655,7 +726,7 @@
         <div class="parallax-layer layer-mid" data-speed="0.3"></div>
         <div class="parallax-layer layer-front" data-speed="0.6"></div>
         
-        <h2 class="immersive-text-overlay" data-speed="0.4">Exploring<br>Cultures</h2>
+        <h2 class="immersive-text-overlay" data-speed="0.4" data-i18n="parallaxText">Exploring<br>Cultures</h2>
     </section>
 
     <!-- 03. PINNED SECTION (Journey) -->
@@ -666,25 +737,25 @@
                   class="w-full h-full object-cover" alt="Sustainable Van">
             <div class="absolute bottom-4 left-4 md:bottom-10 md:left-10 font-mono text-[10px] md:text-xs bg-deepDark/90 text-white p-2 md:p-4 border border-white/20 backdrop-blur-md flex items-center gap-3">
                 <img src="https://files.catbox.moe/kr9py2.png" class="h-4 w-auto opacity-70" alt="Small Logo">
-                The Camper Van
+                <span data-i18n="journeyVan">The Camper Van</span>
             </div>
         </div>
         <div class="w-full md:w-1/2 md:pt-[20vh] space-y-16 md:space-y-[80vh] pb-10 md:pb-[60vh]">
             <div class="space-y-4 md:space-y-6 chapter">
-                <h3 class="font-serif text-3xl md:text-5xl italic text-white">Conservation</h3>
-                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md">
+                <h3 class="font-serif text-3xl md:text-5xl italic text-white" data-i18n="journeyTitle1">Conservation</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md" data-i18n="journeyDesc1">
                     Documenting stories isn't enough. We build living archives that local communities can use to teach the next generation.
                 </p>
             </div>
             <div class="space-y-4 md:space-y-6 chapter">
-                <h3 class="font-serif text-3xl md:text-5xl italic text-white">Exploration</h3>
-                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md">
+                <h3 class="font-serif text-3xl md:text-5xl italic text-white" data-i18n="journeyTitle2">Exploration</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md" data-i18n="journeyDesc2">
                     Curiosity is our fuel. We travel into the remote corners of the world to find the sparks of culture that remain.
                 </p>
             </div>
             <div class="space-y-4 md:space-y-6 chapter">
-                <h3 class="font-serif text-3xl md:text-5xl italic text-white">Sustainability</h3>
-                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md">
+                <h3 class="font-serif text-3xl md:text-5xl italic text-white" data-i18n="journeyTitle3">Sustainability</h3>
+                <p class="text-parchment/70 leading-relaxed font-mono text-xs md:text-sm uppercase tracking-wide max-w-md" data-i18n="journeyDesc3">
                     The path must be light. Our journey respects the land and the people, leaving behind only inspiration.
                 </p>
             </div>
@@ -704,7 +775,7 @@
 
                 <div class="relative z-10 text-center mb-10 md:mb-0">
                     <div class="w-48 h-48 md:w-[40vw] md:h-[40vw] mx-auto rounded-full border border-white/10 flex items-center justify-center backdrop-blur-sm bg-white/5 shadow-2xl">
-                         <h2 class="font-serif text-3xl md:text-6xl italic text-white">Uncovering<br>History</h2>
+                         <h2 class="font-serif text-3xl md:text-6xl italic text-white" data-i18n="artifactsTitle">Uncovering<br>History</h2>
                     </div>
                 </div>
 
@@ -716,7 +787,7 @@
                              <div class="absolute top-2 right-2 opacity-50"><img src="https://files.catbox.moe/kr9py2.png" class="h-4 w-auto"></div>
                             <img src="https://embroideryviet.com/wp-content/uploads/2017/10/Ethnic-travel-Lao-Lu-textiles-Vietnam.jpg" class="w-full h-full object-cover opacity-80">
                         </div>
-                        <p class="font-serif italic text-lg text-white">Ancient Textiles</p>
+                        <p class="font-serif italic text-lg text-white" data-i18n="artifact1">Ancient Textiles</p>
                     </div>
 
                     <!-- 2. The Joy of Culture -->
@@ -726,7 +797,7 @@
                             <img src="https://files.catbox.moe/tgwkuc.jpg" class="w-full h-full object-cover opacity-90 transition-transform duration-700 hover:scale-110">
                         </div>
                         <div class="font-mono text-[10px] text-accent uppercase tracking-widest mb-2">Ref 012</div>
-                        <p class="font-serif italic text-base text-white">The Joy of Culture</p>
+                        <p class="font-serif italic text-base text-white" data-i18n="artifact2">The Joy of Culture</p>
                     </div>
                 </div>
 
@@ -756,11 +827,11 @@
             
             <!-- Intro Text -->
             <div class="relative md:absolute left-0 md:left-[5vw] md:top-[20vh] w-full md:w-[30vw] space-y-4 md:space-y-8 z-10 mb-8 md:mb-0">
-                <div class="font-mono text-accent text-xs">03 — Field Notes</div>
-                <h2 class="font-serif text-4xl md:text-7xl italic leading-tight text-white">
+                <div class="font-mono text-accent text-xs" data-i18n="galleryLabel">03 — Field Notes</div>
+                <h2 class="font-serif text-4xl md:text-7xl italic leading-tight text-white" data-i18n="galleryTitle">
                     Abstract <br> Memory
                 </h2>
-                <p class="font-mono text-xs text-parchment/60 leading-relaxed max-w-sm">
+                <p class="font-mono text-xs text-parchment/60 leading-relaxed max-w-sm" data-i18n="galleryDesc">
                     A non-linear map of human experience. Following the invisible threads that connect us all.
                 </p>
             </div>
@@ -769,14 +840,14 @@
             <div class="relative md:absolute left-auto md:left-[50vw] md:top-[10vh] w-full md:w-[25vw] h-[30vh] md:h-[35vh] group hover:z-20 transition-all duration-500 hoverable">
                 <img src="https://madebygaia.vn/cdn/shop/articles/vietnamese-silk-villages.jpg?v=1730134779" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out border border-white/10 p-2 bg-white/5 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                <div class="font-mono text-[10px] text-white/50 mt-2 text-right">Silk Weavers</div>
+                <div class="font-mono text-[10px] text-white/50 mt-2 text-right" data-i18n="galleryItem1">Silk Weavers</div>
             </div>
 
             <!-- Item 2: Local Songs -->
             <div class="relative md:absolute left-auto md:left-[90vw] md:bottom-[15vh] w-full md:w-[30vw] h-[30vh] md:h-[45vh] group hover:z-20 transition-all duration-500 hoverable">
                 <img src="https://cdn2.tuoitre.vn/thumb_w/1200/tto/i/s626/2017/11/16/c3a9eccb.jpg" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out border border-white/10 p-2 bg-white/5 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                <div class="font-mono text-[10px] text-white/50 mt-2">Local Songs</div>
+                <div class="font-mono text-[10px] text-white/50 mt-2" data-i18n="galleryItem2">Local Songs</div>
             </div>
 
             <!-- Item: Water Puppetry -->
@@ -784,7 +855,7 @@
                 <div class="absolute -top-6 -left-6 z-10 opacity-60"><img src="https://files.catbox.moe/kr9py2.png" class="h-8 w-auto"></div>
                 <img src="https://bcp.cdnchinhphu.vn/344443456812359680/2022/8/2/roi5-1659409522332994724698.jpg" 
                       class="w-full h-full object-cover rounded-lg transition-all duration-500 ease-out border border-white/10 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(204,255,0,0.2)]">
-                 <div class="font-mono text-[10px] text-white/50 mt-2 text-center">Water Puppetry</div>
+                 <div class="font-mono text-[10px] text-white/50 mt-2 text-center" data-i18n="galleryItem3">Water Puppetry</div>
             </div>
 
             <!-- Item 3: Pagodas - FIXED TEXT ALIGNMENT -->
@@ -793,32 +864,32 @@
                       class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-110">
             </div>
              <!-- Moved text to align under image -->
-             <div class="relative md:absolute left-auto md:left-[140vw] md:top-[50vh] md:mt-[21vw] font-mono text-[10px] text-white/50 text-center w-full md:w-[20vw]">Pagodas</div>
+             <div class="relative md:absolute left-auto md:left-[140vw] md:top-[50vh] md:mt-[21vw] font-mono text-[10px] text-white/50 text-center w-full md:w-[20vw]" data-i18n="galleryItem4">Pagodas</div>
 
             <!-- Item 4: Lanterns -->
             <div class="relative md:absolute left-auto md:left-[170vw] md:top-[10vh] w-full md:w-[22vw] h-[30vh] group hover:z-20 transition-all duration-500 hoverable">
                 <img src="https://cdn1.vietnamtourism.org.vn/images/content/2016/11/29/giant-lantern-festival-to-light-up-city-5bc1.jpg" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out border-b-4 border-lime-400/50 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(255,165,0,0.3)]">
-                <div class="font-mono text-[10px] text-white/50 mt-2">Lantern Festival</div>
+                <div class="font-mono text-[10px] text-white/50 mt-2" data-i18n="galleryItem5">Lantern Festival</div>
             </div>
 
             <!-- Item 5: Minorities -->
             <div class="relative md:absolute left-auto md:left-[200vw] md:top-[35vh] w-full md:w-[35vw] h-[40vh] md:h-[50vh] group hover:z-20 transition-all duration-500 hoverable">
                 <img src="https://vpt-en.b-cdn.net/wp-content/uploads/s/06/sapa-ta-van.jpg.webp" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out border border-white/10 p-2 bg-white/5 group-hover:scale-105 group-hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                <div class="font-mono text-[10px] text-white/50 mt-2 text-right">Cultural Minorities</div>
+                <div class="font-mono text-[10px] text-white/50 mt-2 text-right" data-i18n="galleryItem6">Cultural Minorities</div>
             </div>
 
              <!-- Item 6: Incense -->
             <div class="relative md:absolute left-auto md:left-[245vw] md:bottom-[10vh] w-full md:w-[20vw] h-[30vh] md:h-[25vw] rounded-t-full overflow-hidden group hover:z-20 transition-all duration-500 hoverable border border-white/20">
                 <img src="https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=2070&auto=format&fit=crop" 
                       class="w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-110">
-                <div class="absolute bottom-0 left-0 w-full bg-black/50 p-2 text-center font-mono text-[10px] text-white">Bay Views</div>
+                <div class="absolute bottom-0 left-0 w-full bg-black/50 p-2 text-center font-mono text-[10px] text-white" data-i18n="galleryItem7">Bay Views</div>
             </div>
 
             <!-- Quote End -->
             <div class="relative md:absolute left-auto md:left-[290vw] md:top-[40vh] w-full md:w-[30vw] border-l border-white/20 pl-4 py-8 md:py-0">
-                <p class="font-serif italic text-2xl md:text-3xl text-white/90">"To map a culture is to map the stars. Everything is connected."</p>
+                <p class="font-serif italic text-2xl md:text-3xl text-white/90" data-i18n="galleryQuote">"To map a culture is to map the stars. Everything is connected."</p>
                 <img src="https://files.catbox.moe/kr9py2.png" class="h-8 w-auto mt-4 opacity-50" alt="End Logo">
             </div>
 
@@ -839,17 +910,17 @@
         </div>
 
         <div class="relative z-20 w-full max-w-5xl px-4 md:px-8">
-            <div class="font-mono text-accent text-xs mb-10 md:mb-20 opacity-60">04 — Core Principles</div>
+            <div class="font-mono text-accent text-xs mb-10 md:mb-20 opacity-60" data-i18n="valuesLabel">04 — Core Principles</div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 md:gap-y-24">
                 
                 <!-- Value 1 -->
                 <div class="value-item group hoverable">
                     <div class="flex items-center">
-                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Culture"></h3>
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-i18n-typewriter="valCulture" data-text="Culture"></h3>
                         <img src="https://img.icons8.com/ios/100/ffffff/drama.png" class="value-icon" alt="Culture Icon">
                     </div>
-                    <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                    <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc" data-i18n="valCultureDesc">
                         The heartbeat of a community, expressed through ritual and art. It defines who we are.
                     </p>
                 </div>
@@ -857,10 +928,10 @@
                 <!-- Value 2 -->
                 <div class="value-item group hoverable md:mt-24">
                       <div class="flex items-center">
-                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Preservation"></h3>
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-i18n-typewriter="valPreservation" data-text="Preservation"></h3>
                         <img src="https://img.icons8.com/ios/100/ffffff/museum.png" class="value-icon" alt="Preservation Icon">
                     </div>
-                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc" data-i18n="valPreservationDesc">
                         Safeguarding the intangible before it fades into silence. Every story matters.
                     </p>
                 </div>
@@ -868,10 +939,10 @@
                 <!-- Value 3 -->
                 <div class="value-item group hoverable">
                       <div class="flex items-center">
-                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Aether"></h3>
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-i18n-typewriter="valAether" data-text="Aether"></h3>
                          <img src="https://files.catbox.moe/kr9py2.png" class="value-icon" alt="Aether Icon">
                     </div>
-                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc" data-i18n="valAetherDesc">
                         Our brand, passion and work.
                     </p>
                 </div>
@@ -879,10 +950,10 @@
                 <!-- Value 4 -->
                 <div class="value-item group hoverable md:mt-24">
                       <div class="flex items-center">
-                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="History"></h3>
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-i18n-typewriter="valHistory" data-text="History"></h3>
                         <img src="https://img.icons8.com/?size=100&id=115230&format=png&color=FFFFFF" class="value-icon" alt="History Icon">
                     </div>
-                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc" data-i18n="valHistoryDesc">
                         Learning from the past to navigate the future. Wisdom is an inheritance.
                     </p>
                 </div>
@@ -890,10 +961,10 @@
                  <!-- Value 5 -->
                 <div class="value-item group hoverable">
                       <div class="flex items-center">
-                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Future"></h3>
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-i18n-typewriter="valFuture" data-text="Future"></h3>
                          <img src="https://img.icons8.com/ios/100/ffffff/telescope.png" class="value-icon" alt="Future Icon">
                     </div>
-                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc" data-i18n="valFutureDesc">
                         Building a bridge for the next generation to walk upon with pride.
                     </p>
                 </div>
@@ -901,10 +972,10 @@
                  <!-- Value 6 -->
                 <div class="value-item group hoverable md:mt-24">
                       <div class="flex items-center">
-                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-text="Nature"></h3>
+                        <h3 class="font-hand text-5xl md:text-7xl text-white typewriter-text" data-i18n-typewriter="valNature" data-text="Nature"></h3>
                          <img src="https://img.icons8.com/ios/100/ffffff/forest.png" class="value-icon" alt="Nature Icon">
                     </div>
-                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc">
+                      <p class="font-mono text-xs text-parchment/60 mt-4 max-w-xs value-desc" data-i18n="valNatureDesc">
                         Respecting the land that shapes the culture. We are stewards of the earth.
                     </p>
                 </div>
@@ -916,7 +987,7 @@
     <!-- 07. VOICES SECTION -->
     <section id="voices" class="min-h-screen bg-gradient-to-b from-[#0A192F] to-[#112240] py-20 md:py-32 vertical-section">
         <div class="max-w-6xl w-full mx-auto mb-32">
-            <div class="font-mono text-accent text-xs mb-12 opacity-60">05 — The Voices</div>
+            <div class="font-mono text-accent text-xs mb-12 opacity-60" data-i18n="voicesLabel">05 — The Voices</div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
                 
@@ -929,27 +1000,27 @@
                                  onerror="this.src='https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop'"
                                  class="w-full h-full object-cover transition-all duration-700" alt="Ngoc Phan">
                             <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-dark to-transparent">
-                                 <h3 class="font-serif text-3xl md:text-4xl italic text-white">Ngoc Phan</h3>
+                                 <h3 class="font-serif text-3xl md:text-4xl italic text-white" data-i18n="voice1Name">Ngoc Phan</h3>
                                  <p class="font-mono text-xs text-parchment/50 mt-2 uppercase tracking-widest flex items-center">
-                                    Click to Reveal Story <span class="ml-2 text-lg">↻</span>
+                                    <span data-i18n="clickReveal">Click to Reveal Story</span> <span class="ml-2 text-lg">↻</span>
                                  </p>
                             </div>
                         </div>
                         <!-- Back -->
                         <div class="flip-back absolute w-full h-full bg-[#1a2e25] border border-white/10 p-8 md:p-12 flex flex-col justify-center items-start text-left">
-                            <h4 class="font-serif text-xl md:text-2xl italic text-white mb-6">"To archive is to remember who we are."</h4>
-                            <p class="font-mono text-xs text-parchment/80 leading-relaxed mb-8">
+                            <h4 class="font-serif text-xl md:text-2xl italic text-white mb-6" data-i18n="voice1Quote">"To archive is to remember who we are."</h4>
+                            <p class="font-mono text-xs text-parchment/80 leading-relaxed mb-8" data-i18n="voice1Bio">
                                 Growing up in the rapidly modernizing streets of Hanoi, Phan felt a disconnect from his heritage. He turned to archival work not just to organize history, but to find his own roots.
                             </p>
                             <div class="w-full h-[1px] bg-white/20 mb-8"></div>
                             <div class="grid grid-cols-2 gap-4 w-full">
                                 <div>
-                                    <div class="font-mono text-[10px] text-white/40 uppercase">Location</div>
-                                    <div class="font-serif text-sm text-white">Hanoi, Vietnam</div>
+                                    <div class="font-mono text-[10px] text-white/40 uppercase" data-i18n="locationLabel">Location</div>
+                                    <div class="font-serif text-sm text-white" data-i18n="voice1Loc">Hanoi, Vietnam</div>
                                 </div>
                                 <div>
-                                    <div class="font-mono text-[10px] text-white/40 uppercase">Focus</div>
-                                    <div class="font-serif text-sm text-white">Cultural Archival</div>
+                                    <div class="font-mono text-[10px] text-white/40 uppercase" data-i18n="focusLabel">Focus</div>
+                                    <div class="font-serif text-sm text-white" data-i18n="voice1Focus">Cultural Archival</div>
                                 </div>
                             </div>
                         </div>
@@ -965,27 +1036,27 @@
                                  onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop'"
                                  class="w-full h-full object-cover transition-all duration-700" alt="Diep Chi">
                             <div class="absolute bottom-0 left-0 w-full p-8 bg-gradient-to-t from-dark to-transparent">
-                                 <h3 class="font-serif text-3xl md:text-4xl italic text-white">Diep Chi</h3>
+                                 <h3 class="font-serif text-3xl md:text-4xl italic text-white" data-i18n="voice2Name">Diep Chi</h3>
                                  <p class="font-mono text-xs text-parchment/50 mt-2 uppercase tracking-widest flex items-center">
-                                    Click to Reveal Story <span class="ml-2 text-lg">↻</span>
+                                    <span data-i18n="clickReveal">Click to Reveal Story</span> <span class="ml-2 text-lg">↻</span>
                                  </p>
                             </div>
                         </div>
                         <!-- Back -->
                         <div class="flip-back absolute w-full h-full bg-[#3d2b1f] border border-white/10 p-8 md:p-12 flex flex-col justify-center items-start text-left">
-                            <h4 class="font-serif text-xl md:text-2xl italic text-white mb-6">"Art is the memory of the land."</h4>
-                            <p class="font-mono text-xs text-parchment/80 leading-relaxed mb-8">
+                            <h4 class="font-serif text-xl md:text-2xl italic text-white mb-6" data-i18n="voice2Quote">"Art is the memory of the land."</h4>
+                            <p class="font-mono text-xs text-parchment/80 leading-relaxed mb-8" data-i18n="voice2Bio">
                                 Born amidst the endless rice paddies of the South, Diep Chi found beauty in the everyday. Her art evolved from childhood sketches in the mud to sophisticated visual storytelling.
                             </p>
                             <div class="w-full h-[1px] bg-white/20 mb-8"></div>
                             <div class="grid grid-cols-2 gap-4 w-full">
                                 <div>
-                                    <div class="font-mono text-[10px] text-white/40 uppercase">Location</div>
-                                    <div class="font-serif text-sm text-white">Southern Vietnam</div>
+                                    <div class="font-mono text-[10px] text-white/40 uppercase" data-i18n="locationLabel">Location</div>
+                                    <div class="font-serif text-sm text-white" data-i18n="voice2Loc">Southern Vietnam</div>
                                 </div>
                                 <div>
-                                    <div class="font-mono text-[10px] text-white/40 uppercase">Focus</div>
-                                    <div class="font-serif text-sm text-white">Visual Arts</div>
+                                    <div class="font-mono text-[10px] text-white/40 uppercase" data-i18n="focusLabel">Focus</div>
+                                    <div class="font-serif text-sm text-white" data-i18n="voice2Focus">Visual Arts</div>
                                 </div>
                             </div>
                         </div>
@@ -1002,11 +1073,11 @@
         <div id="impact-canvas"></div>
 
         <div class="max-w-5xl w-full mx-auto relative z-10 px-4 md:px-0">
-             <div class="font-mono text-accent text-xs mb-12 opacity-60">06 — Our Impact</div>
+             <div class="font-mono text-accent text-xs mb-12 opacity-60" data-i18n="impactLabel">06 — Our Impact</div>
              
              <div class="impact-graph mb-8 md:mb-16 backdrop-blur-md bg-[#0A192F]/50 p-4 md:p-6 rounded-lg border border-white/5">
                  <div class="flex flex-col md:flex-row justify-between md:items-end font-serif text-lg md:text-3xl text-white">
-                     <span class="max-w-xs md:max-w-none">Vietnamese Ethnic Groups</span>
+                     <span class="max-w-xs md:max-w-none" data-i18n="impactMetric1">Vietnamese Ethnic Groups</span>
                      <span class="stat-number text-white mt-2 md:mt-0" data-target="54">0</span>
                  </div>
                  <div class="bar-container">
@@ -1016,7 +1087,7 @@
 
              <div class="impact-graph mb-8 md:mb-16 backdrop-blur-md bg-[#0A192F]/50 p-4 md:p-6 rounded-lg border border-white/5">
                  <div class="flex flex-col md:flex-row justify-between md:items-end font-serif text-lg md:text-3xl text-white">
-                     <span>Content Delivery</span>
+                     <span data-i18n="impactMetric2">Content Delivery</span>
                      <span class="stat-number text-white mt-2 md:mt-0" data-target="100" data-suffix="%">0</span>
                  </div>
                  <div class="bar-container">
@@ -1026,7 +1097,7 @@
 
              <div class="impact-graph backdrop-blur-md bg-[#0A192F]/50 p-4 md:p-6 rounded-lg border border-white/5">
                  <div class="flex flex-col md:flex-row justify-between md:items-end font-serif text-lg md:text-3xl text-white">
-                     <span class="max-w-xl">Passion & Dedication</span>
+                     <span class="max-w-xl" data-i18n="impactMetric3">Passion & Dedication</span>
                      <span class="stat-number text-white mt-2 md:mt-0" data-target="Infinite">Infinite</span>
                  </div>
                  <div class="bar-container">
@@ -1046,16 +1117,16 @@
             
             <!-- Left Text Content -->
             <div class="w-full md:w-1/2 space-y-8 game-content opacity-0 translate-y-20">
-                <div class="font-mono text-accent text-xs opacity-60 uppercase tracking-widest">07 — Interactive Experience</div>
+                <div class="font-mono text-accent text-xs opacity-60 uppercase tracking-widest" data-i18n="expLabel">07 — Interactive Experience</div>
                 <h2 class="font-serif text-4xl md:text-7xl italic text-white leading-tight">
-                    Discover Vietnam <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-white">Through Play</span>
+                    <span data-i18n="expTitle1">Discover Vietnam</span> <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-white" data-i18n="expTitle2">Through Play</span>
                 </h2>
-                <p class="font-mono text-sm text-parchment/70 leading-relaxed">
+                <p class="font-mono text-sm text-parchment/70 leading-relaxed" data-i18n="expDesc">
                     Immerse yourself in the "Aether Experience" — a digital journey where you uncover hidden cultures, collect rare artifacts, and unlock the essence of Vietnamese destinations through engaging mini-games.
                 </p>
                 
                 <a href="https://game.aetherculture.site" target="_blank" class="game-btn inline-block mt-8 px-10 py-4 border border-white/30 text-white font-mono text-sm uppercase tracking-widest hover:bg-white hover:text-dark transition-all duration-500 hoverable">
-                    Enter the Simulation
+                    <span data-i18n="expBtn">Enter the Simulation</span>
                 </a>
             </div>
 
@@ -1076,9 +1147,9 @@
                         <div class="absolute bottom-8 left-8">
                             <div class="flex items-center space-x-2 mb-2">
                                 <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                                <span class="font-mono text-[10px] text-green-400 uppercase">Live Demo</span>
+                                <span class="font-mono text-[10px] text-green-400 uppercase" data-i18n="liveDemo">Live Demo</span>
                             </div>
-                            <h3 class="font-serif text-3xl italic text-white">The Aether Quest</h3>
+                            <h3 class="font-serif text-3xl italic text-white" data-i18n="gameTitle">The Aether Quest</h3>
                         </div>
                     </div>
                 </div>
@@ -1090,7 +1161,7 @@
     <!-- 10. SOCIAL MEDIA & FOOTER -->
     <section id="socials" class="min-h-[80vh] bg-[#020c1b] relative flex flex-col justify-center items-center border-t border-white/10 overflow-hidden py-20">
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center pointer-events-none opacity-[0.03]">
-             <h1 class="text-[20vw] font-serif italic text-white leading-none">Connect</h1>
+             <h1 class="text-[20vw] font-serif italic text-white leading-none" data-i18n="connectBig">Connect</h1>
         </div>
 
         <div class="z-10 w-full max-w-4xl px-8 flex flex-col items-center">
@@ -1098,7 +1169,7 @@
             <!-- BRANDING: Big Footer Logo -->
             <img src="https://files.catbox.moe/kr9py2.png" class="h-16 md:h-24 w-auto mb-8 opacity-50 hover:opacity-100 transition-opacity duration-500" alt="Footer Logo">
 
-            <div class="font-mono text-accent text-xs mb-12 opacity-60 text-center uppercase tracking-widest">Join the Community</div>
+            <div class="font-mono text-accent text-xs mb-12 opacity-60 text-center uppercase tracking-widest" data-i18n="joinCommunity">Join the Community</div>
             <div class="flex flex-col items-center space-y-6 w-full">
                 <!-- Social Links -->
                 <a href="https://www.instagram.com/aether.co.39?igsh=c3Joemc3cjk4cHA0" target="_blank" class="social-link group w-full flex justify-between items-center py-6 border-b border-white/10 hover:border-white/50 transition-colors hoverable">
@@ -1118,7 +1189,7 @@
                     <svg class="social-icon w-8 h-8 md:w-12 md:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>
                 </a>
             </div>
-            <div class="mt-20 text-center opacity-30 font-mono text-[10px]">Aether © 2026. All rights reserved. <br> Designed for Preservation.</div>
+            <div class="mt-20 text-center opacity-30 font-mono text-[10px]" data-i18n="copyright">Aether © 2026. All rights reserved. <br> Designed for Preservation.</div>
         </div>
     </section>
 
@@ -1128,6 +1199,454 @@
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
 
     <script>
+        // TRANSLATION DATA
+        const translations = {
+            en: {
+                clickEnter: "Click to Enter",
+                navManifesto: "Manifesto",
+                navJourney: "Journey",
+                navGallery: "Gallery",
+                navExperience: "Experience",
+                heroSub: "Mapping the Path",
+                heroScroll: "Scroll to Begin",
+                manifestoTitle: "01 — Manifesto",
+                manifestoText: "Our journey began with a simple belief: that cultures are living treasures, and once lost, they can never truly be replaced. In a world moving faster than ever, many indigenous and lesser-known communities are fading into silence not because they lack value, but because they lack visibility. On these values as foundation, we documented cultures into high quality videos.",
+                parallaxText: "Exploring<br>Cultures",
+                journeyVan: "The Camper Van",
+                journeyTitle1: "Conservation",
+                journeyDesc1: "Documenting stories isn't enough. We build living archives that local communities can use to teach the next generation.",
+                journeyTitle2: "Exploration",
+                journeyDesc2: "Curiosity is our fuel. We travel into the remote corners of the world to find the sparks of culture that remain.",
+                journeyTitle3: "Sustainability",
+                journeyDesc3: "The path must be light. Our journey respects the land and the people, leaving behind only inspiration.",
+                artifactsTitle: "Uncovering<br>History",
+                artifact1: "Ancient Textiles",
+                artifact2: "The Joy of Culture",
+                galleryLabel: "03 — Field Notes",
+                galleryTitle: "Abstract <br> Memory",
+                galleryDesc: "A non-linear map of human experience. Following the invisible threads that connect us all.",
+                galleryItem1: "Silk Weavers",
+                galleryItem2: "Local Songs",
+                galleryItem3: "Water Puppetry",
+                galleryItem4: "Pagodas",
+                galleryItem5: "Lantern Festival",
+                galleryItem6: "Cultural Minorities",
+                galleryItem7: "Bay Views",
+                galleryQuote: "\"To map a culture is to map the stars. Everything is connected.\"",
+                valuesLabel: "04 — Core Principles",
+                valCulture: "Culture",
+                valCultureDesc: "The heartbeat of a community, expressed through ritual and art. It defines who we are.",
+                valPreservation: "Preservation",
+                valPreservationDesc: "Safeguarding the intangible before it fades into silence. Every story matters.",
+                valAether: "Aether",
+                valAetherDesc: "Our brand, passion and work.",
+                valHistory: "History",
+                valHistoryDesc: "Learning from the past to navigate the future. Wisdom is an inheritance.",
+                valFuture: "Future",
+                valFutureDesc: "Building a bridge for the next generation to walk upon with pride.",
+                valNature: "Nature",
+                valNatureDesc: "Respecting the land that shapes the culture. We are stewards of the earth.",
+                voicesLabel: "05 — The Voices",
+                voice1Name: "Ngoc Phan",
+                clickReveal: "Click to Reveal Story",
+                voice1Quote: "\"To archive is to remember who we are.\"",
+                voice1Bio: "Growing up in the rapidly modernizing streets of Hanoi, Phan felt a disconnect from his heritage. He turned to archival work not just to organize history, but to find his own roots.",
+                locationLabel: "Location",
+                focusLabel: "Focus",
+                voice1Loc: "Hanoi, Vietnam",
+                voice1Focus: "Cultural Archival",
+                voice2Name: "Diep Chi",
+                voice2Quote: "\"Art is the memory of the land.\"",
+                voice2Bio: "Born amidst the endless rice paddies of the South, Diep Chi found beauty in the everyday. Her art evolved from childhood sketches in the mud to sophisticated visual storytelling.",
+                voice2Loc: "Southern Vietnam",
+                voice2Focus: "Visual Arts",
+                impactLabel: "06 — Our Impact",
+                impactMetric1: "Vietnamese Ethnic Groups",
+                impactMetric2: "Content Delivery",
+                impactMetric3: "Passion & Dedication",
+                expLabel: "07 — Interactive Experience",
+                expTitle1: "Discover Vietnam",
+                expTitle2: "Through Play",
+                expDesc: "Immerse yourself in the \"Aether Experience\" — a digital journey where you uncover hidden cultures, collect rare artifacts, and unlock the essence of Vietnamese destinations through engaging mini-games.",
+                expBtn: "Enter the Simulation",
+                liveDemo: "Live Demo",
+                gameTitle: "The Aether Quest",
+                connectBig: "Connect",
+                joinCommunity: "Join the Community",
+                copyright: "Aether © 2026. All rights reserved. <br> Designed for Preservation."
+            },
+            vi: {
+                clickEnter: "Nhấn Để Vào",
+                navManifesto: "Tuyên Ngôn",
+                navJourney: "Hành Trình",
+                navGallery: "Thư Viện",
+                navExperience: "Trải Nghiệm",
+                heroSub: "Vẽ Lại Con Đường",
+                heroScroll: "Cuộn Để Bắt Đầu",
+                manifestoTitle: "01 — Tuyên Ngôn",
+                manifestoText: "Hành trình của chúng tôi bắt đầu với một niềm tin đơn giản: văn hóa là kho báu sống, và một khi đã mất đi, chúng không bao giờ có thể thay thế được. Trong một thế giới chuyển động nhanh hơn bao giờ hết, nhiều cộng đồng bản địa đang chìm vào quên lãng không phải vì họ thiếu giá trị, mà vì họ thiếu sự hiện diện. Dựa trên những giá trị này, chúng tôi đã ghi lại văn hóa qua những thước phim chất lượng cao.",
+                parallaxText: "Khám Phá<br>Văn Hóa",
+                journeyVan: "Chiếc Xe Camper",
+                journeyTitle1: "Bảo Tồn",
+                journeyDesc1: "Ghi lại những câu chuyện là chưa đủ. Chúng tôi xây dựng những kho lưu trữ sống mà cộng đồng địa phương có thể sử dụng để dạy cho thế hệ sau.",
+                journeyTitle2: "Thám Hiểm",
+                journeyDesc2: "Sự tò mò là nhiên liệu của chúng tôi. Chúng tôi đi đến những góc xa xôi của thế giới để tìm những đốm lửa văn hóa còn sót lại.",
+                journeyTitle3: "Bền Vững",
+                journeyDesc3: "Con đường phải nhẹ nhàng. Hành trình của chúng tôi tôn trọng đất đai và con người, chỉ để lại nguồn cảm hứng.",
+                artifactsTitle: "Khám Phá<br>Lịch Sử",
+                artifact1: "Dệt May Cổ",
+                artifact2: "Niềm Vui Văn Hóa",
+                galleryLabel: "03 — Ghi Chép Thực Địa",
+                galleryTitle: "Ký Ức <br> Trừu Tượng",
+                galleryDesc: "Một bản đồ phi tuyến tính của trải nghiệm con người. Theo dõi những sợi dây vô hình kết nối tất cả chúng ta.",
+                galleryItem1: "Nghệ Nhân Dệt Lụa",
+                galleryItem2: "Bài Ca Địa Phương",
+                galleryItem3: "Múa Rối Nước",
+                galleryItem4: "Chùa Chiền",
+                galleryItem5: "Lễ Hội Đèn Lồng",
+                galleryItem6: "Dân Tộc Thiểu Số",
+                galleryItem7: "Cảnh Vịnh",
+                galleryQuote: "\"Vẽ bản đồ văn hóa là vẽ bản đồ các vì sao. Mọi thứ đều được kết nối.\"",
+                valuesLabel: "04 — Nguyên Tắc Cốt Lỗi",
+                valCulture: "Văn Hóa",
+                valCultureDesc: "Nhịp đập của một cộng đồng, thể hiện qua nghi lễ và nghệ thuật. Nó định nghĩa chúng ta là ai.",
+                valPreservation: "Bảo Tồn",
+                valPreservationDesc: "Bảo vệ những giá trị phi vật thể trước khi chúng chìm vào im lặng. Mọi câu chuyện đều quan trọng.",
+                valAether: "Aether",
+                valAetherDesc: "Thương hiệu, đam mê và công việc của chúng tôi.",
+                valHistory: "Lịch Sử",
+                valHistoryDesc: "Học hỏi từ quá khứ để định hướng tương lai. Trí tuệ là một di sản.",
+                valFuture: "Tương Lai",
+                valFutureDesc: "Xây dựng cầu nối cho thế hệ tiếp theo bước đi với niềm tự hào.",
+                valNature: "Thiên Nhiên",
+                valNatureDesc: "Tôn trọng vùng đất hình thành nên văn hóa. Chúng ta là những người quản lý trái đất.",
+                voicesLabel: "05 — Những Tiếng Nói",
+                voice1Name: "Ngọc Phan",
+                clickReveal: "Nhấn để xem câu chuyện",
+                voice1Quote: "\"Lưu trữ là để nhớ chúng ta là ai.\"",
+                voice1Bio: "Lớn lên trên những con phố hiện đại hóa nhanh chóng của Hà Nội, Phan cảm thấy mất kết nối với di sản của mình. Anh chuyển sang công việc lưu trữ không chỉ để tổ chức lịch sử, mà để tìm lại cội nguồn của chính mình.",
+                locationLabel: "Địa Điểm",
+                focusLabel: "Tiêu Điểm",
+                voice1Loc: "Hà Nội, Việt Nam",
+                voice1Focus: "Lưu Trữ Văn Hóa",
+                voice2Name: "Diệp Chi",
+                voice2Quote: "\"Nghệ thuật là ký ức của vùng đất.\"",
+                voice2Bio: "Sinh ra giữa những cánh đồng lúa bất tận của miền Nam, Diệp Chi tìm thấy vẻ đẹp trong những điều bình dị. Nghệ thuật của cô phát triển từ những bức phác họa tuổi thơ trên bùn đất đến cách kể chuyện bằng hình ảnh tinh tế.",
+                voice2Loc: "Miền Nam Việt Nam",
+                voice2Focus: "Nghệ Thuật Thị Giác",
+                impactLabel: "06 — Tác Động Của Chúng Tôi",
+                impactMetric1: "Nhóm Dân Tộc Việt Nam",
+                impactMetric2: "Phân Phối Nội Dung",
+                impactMetric3: "Đam Mê & Cống Hiến",
+                expLabel: "07 — Trải Nghiệm Tương Tác",
+                expTitle1: "Khám Phá Việt Nam",
+                expTitle2: "Qua Trò Chơi",
+                expDesc: "Đắm mình trong \"Trải Nghiệm Aether\" — một hành trình kỹ thuật số nơi bạn khám phá những nền văn hóa ẩn giấu, thu thập cổ vật quý hiếm và mở khóa tinh hoa của các điểm đến Việt Nam qua các trò chơi nhỏ hấp dẫn.",
+                expBtn: "Vào Mô Phỏng",
+                liveDemo: "Bản Demo Trực Tiếp",
+                gameTitle: "Nhiệm Vụ Aether",
+                connectBig: "Kết Nối",
+                joinCommunity: "Tham Gia Cộng Đồng",
+                copyright: "Aether © 2026. Mọi quyền được bảo lưu. <br> Thiết kế cho sự bảo tồn."
+            },
+            zh: {
+                clickEnter: "点击进入",
+                navManifesto: "宣言",
+                navJourney: "旅程",
+                navGallery: "画廊",
+                navExperience: "体验",
+                heroSub: "绘制路径",
+                heroScroll: "滚动开始",
+                manifestoTitle: "01 — 宣言",
+                manifestoText: "我们的旅程始于一个简单的信念：文化是活着的宝藏，一旦丢失，就无法真正被取代。在一个发展比以往任何时候都快的世界里，许多土著和鲜为人知的社区正逐渐消失在沉默中，不是因为他们缺乏价值，而是因为他们缺乏可见度。以这些价值观为基础，我们将文化记录成高质量的视频。",
+                parallaxText: "探索<br>文化",
+                journeyVan: "露营车",
+                journeyTitle1: "保护",
+                journeyDesc1: "仅仅记录故事是不够的。我们建立活的档案，当地社区可以用它来教导下一代。",
+                journeyTitle2: "探索",
+                journeyDesc2: "好奇心是我们的燃料。我们前往世界的偏远角落，寻找仅存的文化火花。",
+                journeyTitle3: "可持续性",
+                journeyDesc3: "道路必须是轻盈的。我们的旅程尊重土地和人民，只留下灵感。",
+                artifactsTitle: "揭示<br>历史",
+                artifact1: "古代纺织品",
+                artifact2: "文化的喜悦",
+                galleryLabel: "03 —以此田野笔记",
+                galleryTitle: "抽象 <br> 记忆",
+                galleryDesc: "人类经验的非线性地图。跟随连接我们所有人的无形线索。",
+                galleryItem1: "丝绸织工",
+                galleryItem2: "当地歌曲",
+                galleryItem3: "水上木偶戏",
+                galleryItem4: "宝塔",
+                galleryItem5: "灯笼节",
+                galleryItem6: "文化少数民族",
+                galleryItem7: "海湾景观",
+                galleryQuote: "“绘制文化地图就是绘制星图。一切都是相互连接的。”",
+                valuesLabel: "04 — 核心原则",
+                valCulture: "文化",
+                valCultureDesc: "社区的心跳，通过仪式和艺术表达。它定义了我们是谁。",
+                valPreservation: "保护",
+                valPreservationDesc: "在无形资产消失在沉默中之前保护它们。每一个故事都很重要。",
+                valAether: "以太",
+                valAetherDesc: "我们的品牌，激情和工作。",
+                valHistory: "历史",
+                valHistoryDesc: "从过去学习以导航未来。智慧是一种遗产。",
+                valFuture: "未来",
+                valFutureDesc: "为下一代建立一座自豪地行走的桥梁。",
+                valNature: "自然",
+                valNatureDesc: "尊重塑造文化的土地。我们是地球的管理者。",
+                voicesLabel: "05 — 声音",
+                voice1Name: "Ngọc Phan",
+                clickReveal: "点击揭示故事",
+                voice1Quote: "“存档就是记住我们是谁。”",
+                voice1Bio: "在河内迅速现代化的街道上长大，Phan感到与他的遗产脱节。他转向档案工作不仅是为了组织历史，而是为了寻找他自己的根源。",
+                locationLabel: "地点",
+                focusLabel: "焦点",
+                voice1Loc: "越南河内",
+                voice1Focus: "文化档案",
+                voice2Name: "Diep Chi",
+                voice2Quote: "“艺术是土地的记忆。”",
+                voice2Bio: "出生在南方无尽的稻田中，Diep Chi在日常生活中发现了美。她的艺术从童年时期在泥土中的素描演变为复杂的视觉叙事。",
+                voice2Loc: "越南南部",
+                voice2Focus: "视觉艺术",
+                impactLabel: "06 — 我们的影响",
+                impactMetric1: "越南民族群体",
+                impactMetric2: "内容交付",
+                impactMetric3: "激情与奉献",
+                expLabel: "07 — 互动体验",
+                expTitle1: "发现越南",
+                expTitle2: "通过游戏",
+                expDesc: "让自己沉浸在“以太体验”中 —— 一个数字旅程，你可以通过引人入胜的迷你游戏发现隐藏的文化，收集稀有的文物，并解锁越南目的地的精髓。",
+                expBtn: "进入模拟",
+                liveDemo: "现场演示",
+                gameTitle: "以太任务",
+                connectBig: "连接",
+                joinCommunity: "加入社区",
+                copyright: "Aether © 2026. 版权所有。<br> 为保护而设计。"
+            },
+            hi: {
+                clickEnter: "प्रवेश करने के लिए क्लिक करें",
+                navManifesto: "घोषणापत्र",
+                navJourney: "यात्रा",
+                navGallery: "गेलरी",
+                navExperience: "अनुभव",
+                heroSub: "रास्ते का मानचित्रण",
+                heroScroll: "शुरू करने के लिए स्क्रॉल करें",
+                manifestoTitle: "01 — घोषणापत्र",
+                manifestoText: "हमारी यात्रा एक साधारण विश्वास के साथ शुरू हुई: कि संस्कृतियाँ जीवित खजाने हैं, और एक बार खो जाने के बाद, उन्हें कभी भी बदला नहीं जा सकता है। एक ऐसी दुनिया में जो पहले से कहीं अधिक तेजी से आगे बढ़ रही है, कई स्वदेशी और कम ज्ञात समुदाय मौन में लुप्त हो रहे हैं क्योंकि उनमें मूल्य की कमी नहीं है, बल्कि इसलिए कि उनमें दृश्यता की कमी है। नींव के रूप में इन मूल्यों पर, हमने संस्कृतियों को उच्च गुणवत्ता वाले वीडियो में प्रलेखित किया।",
+                parallaxText: "संस्कृतियों की<br>खोज",
+                journeyVan: "कैम्पर वैन",
+                journeyTitle1: "संरक्षण",
+                journeyDesc1: "कहानियों का दस्तावेजीकरण करना पर्याप्त नहीं है। हम जीवित अभिलेखागार बनाते हैं जिनका उपयोग स्थानीय समुदाय अगली पीढ़ी को पढ़ाने के लिए कर सकते हैं।",
+                journeyTitle2: "अन्वेषण",
+                journeyDesc2: "जिज्ञासा हमारा ईंधन है। हम दुनिया के दूरदराज के कोनों में उन संस्कृति की चिंगारियों को खोजने के लिए यात्रा करते हैं जो बची हुई हैं।",
+                journeyTitle3: "स्थिरता",
+                journeyDesc3: "रास्ता हल्का होना चाहिए। हमारी यात्रा भूमि और लोगों का सम्मान करती है, केवल प्रेरणा पीछे छोड़ती है।",
+                artifactsTitle: "इतिहास को<br>उजागर करना",
+                artifact1: "प्राचीन वस्त्र",
+                artifact2: "संस्कृति का आनंद",
+                galleryLabel: "03 — क्षेत्र टिप्पणियाँ",
+                galleryTitle: "अमूर्त <br> स्मृति",
+                galleryDesc: "मानव अनुभव का एक गैर-रैखिक मानचित्र। उन अदृश्य धागों का अनुसरण करना जो हम सभी को जोड़ते हैं।",
+                galleryItem1: "रेशम बुनकर",
+                galleryItem2: "स्थानीय गीत",
+                galleryItem3: "जल कठपुतली",
+                galleryItem4: "पैगोडा",
+                galleryItem5: "लालटेन महोत्सव",
+                galleryItem6: "सांस्कृतिक अल्पसंख्यक",
+                galleryItem7: "खाड़ी के दृश्य",
+                galleryQuote: "\"संस्कृति का मानचित्रण करना तारों का मानचित्रण करने जैसा है। सब कुछ जुड़ा हुआ है।\"",
+                valuesLabel: "04 — मूल सिद्धांत",
+                valCulture: "संस्कृति",
+                valCultureDesc: "एक समुदाय की धड़कन, अनुष्ठान और कला के माध्यम से व्यक्त की जाती है। यह परिभाषित करता है कि हम कौन हैं।",
+                valPreservation: "संरक्षण",
+                valPreservationDesc: "अमूर्त को मौन में लुप्त होने से पहले सुरक्षित करना। हर कहानी मायने रखती है।",
+                valAether: "एथर",
+                valAetherDesc: "हमारा ब्रांड, जुनून और काम।",
+                valHistory: "इतिहास",
+                valHistoryDesc: "भविष्य को नेविगेट करने के लिए अतीत से सीखना। ज्ञान एक विरासत है।",
+                valFuture: "भविष्य",
+                valFutureDesc: "अगली पीढ़ी के लिए गर्व के साथ चलने के लिए एक पुल का निर्माण करना।",
+                valNature: "प्रकृति",
+                valNatureDesc: "उस भूमि का सम्मान करना जो संस्कृति को आकार देती है। हम पृथ्वी के कार्यवाहक हैं।",
+                voicesLabel: "05 — आवाज़ें",
+                voice1Name: "Ngoc Phan",
+                clickReveal: "कहानी प्रकट करने के लिए क्लिक करें",
+                voice1Quote: "\"संग्रह करना यह याद रखना है कि हम कौन हैं।\"",
+                voice1Bio: "हनोई की तेजी से आधुनिक होती सड़कों में बड़े होते हुए, फान ने अपनी विरासत से एक अलगाव महसूस किया। वह न केवल इतिहास को व्यवस्थित करने के लिए, बल्कि अपनी जड़ों को खोजने के लिए अभिलेखीय कार्य की ओर मुड़ा।",
+                locationLabel: "स्थान",
+                focusLabel: "फोकस",
+                voice1Loc: "हनोई, वियतनाम",
+                voice1Focus: "सांस्कृतिक अभिलेखीय",
+                voice2Name: "Diep Chi",
+                voice2Quote: "\"कला भूमि की स्मृति है।\"",
+                voice2Bio: "दक्षिण के अंतहीन धान के खेतों के बीच जन्मी, डीप ची ने रोजमर्रा की जिंदगी में सुंदरता पाई। उसकी कला बचपन में कीचड़ में रेखाचित्रों से परिष्कृत दृश्य कहानी कहने के लिए विकसित हुई।",
+                voice2Loc: "दक्षिणी वियतनाम",
+                voice2Focus: "दृश्य कला",
+                impactLabel: "06 — हमारा प्रभाव",
+                impactMetric1: "वियतनामी जातीय समूह",
+                impactMetric2: "सामग्री वितरण",
+                impactMetric3: "जुनून और समर्पण",
+                expLabel: "07 — इंटरैक्टिव अनुभव",
+                expTitle1: "वियतनाम की खोज करें",
+                expTitle2: "खेल के माध्यम से",
+                expDesc: "\"एथर अनुभव\" में खुद को डुबो दें - एक डिजिटल यात्रा जहां आप छिपी हुई संस्कृतियों को उजागर करते हैं, दुर्लभ कलाकृतियों को इकट्ठा करते हैं, और आकर्षक मिनी-गेम्स के माध्यम से वियतनामी स्थलों के सार को अनलॉक करते हैं।",
+                expBtn: "सिमुलेशन दर्ज करें",
+                liveDemo: "लाइव डेमो",
+                gameTitle: "एथर क्वेस्ट",
+                connectBig: "जुड़ें",
+                joinCommunity: "समुदाय में शामिल हों",
+                copyright: "एथर © 2026. सर्वाधिकार सुरक्षित। <br> संरक्षण के लिए डिज़ाइन किया गया।"
+            },
+            fr: {
+                clickEnter: "Cliquez pour Entrer",
+                navManifesto: "Manifeste",
+                navJourney: "Voyage",
+                navGallery: "Galerie",
+                navExperience: "Expérience",
+                heroSub: "Tracer le Chemin",
+                heroScroll: "Défiler pour Commencer",
+                manifestoTitle: "01 — Manifeste",
+                manifestoText: "Notre voyage a commencé avec une simple conviction : que les cultures sont des trésors vivants, et qu'une fois perdues, elles ne peuvent jamais être vraiment remplacées. Dans un monde qui bouge plus vite que jamais, de nombreuses communautés indigènes et méconnues s'effacent dans le silence non pas parce qu'elles manquent de valeur, mais parce qu'elles manquent de visibilité. Sur ces valeurs comme fondation, nous avons documenté les cultures dans des vidéos de haute qualité.",
+                parallaxText: "Explorer<br>les Cultures",
+                journeyVan: "Le Camping-car",
+                journeyTitle1: "Conservation",
+                journeyDesc1: "Documenter des histoires ne suffit pas. Nous construisons des archives vivantes que les communautés locales peuvent utiliser pour enseigner à la prochaine génération.",
+                journeyTitle2: "Exploration",
+                journeyDesc2: "La curiosité est notre carburant. Nous voyageons dans les coins reculés du monde pour trouver les étincelles de culture qui restent.",
+                journeyTitle3: "Durabilité",
+                journeyDesc3: "Le chemin doit être léger. Notre voyage respecte la terre et les gens, ne laissant derrière que de l'inspiration.",
+                artifactsTitle: "Découvrir<br>l'Histoire",
+                artifact1: "Textiles Anciens",
+                artifact2: "La Joie de la Culture",
+                galleryLabel: "03 — Notes de Terrain",
+                galleryTitle: "Mémoire <br> Abstraite",
+                galleryDesc: "Une carte non linéaire de l'expérience humaine. Suivre les fils invisibles qui nous connectent tous.",
+                galleryItem1: "Tisserands de Soie",
+                galleryItem2: "Chansons Locales",
+                galleryItem3: "Marionnettes sur l'Eau",
+                galleryItem4: "Pagodes",
+                galleryItem5: "Festival des Lanternes",
+                galleryItem6: "Minorités Culturelles",
+                galleryItem7: "Vues de la Baie",
+                galleryQuote: "\"Cartographier une culture, c'est cartographier les étoiles. Tout est connecté.\"",
+                valuesLabel: "04 — Principes Fondamentaux",
+                valCulture: "Culture",
+                valCultureDesc: "Le battement de cœur d'une communauté, exprimé à travers le rituel et l'art. Elle définit qui nous sommes.",
+                valPreservation: "Préservation",
+                valPreservationDesc: "Sauvegarder l'immatériel avant qu'il ne s'efface dans le silence. Chaque histoire compte.",
+                valAether: "Aether",
+                valAetherDesc: "Notre marque, passion et travail.",
+                valHistory: "Histoire",
+                valHistoryDesc: "Apprendre du passé pour naviguer dans le futur. La sagesse est un héritage.",
+                valFuture: "Futur",
+                valFutureDesc: "Construire un pont pour que la prochaine génération marche avec fierté.",
+                valNature: "Nature",
+                valNatureDesc: "Respecter la terre qui façonne la culture. Nous sommes les gardiens de la terre.",
+                voicesLabel: "05 — Les Voix",
+                voice1Name: "Ngoc Phan",
+                clickReveal: "Cliquez pour Révéler l'Histoire",
+                voice1Quote: "\"Archiver, c'est se souvenir de qui nous sommes.\"",
+                voice1Bio: "En grandissant dans les rues de Hanoï en modernisation rapide, Phan a ressenti une déconnexion de son héritage. Il s'est tourné vers le travail d'archivage non seulement pour organiser l'histoire, mais pour retrouver ses propres racines.",
+                locationLabel: "Lieu",
+                focusLabel: "Focus",
+                voice1Loc: "Hanoï, Vietnam",
+                voice1Focus: "Archivage Culturel",
+                voice2Name: "Diep Chi",
+                voice2Quote: "\"L'art est la mémoire de la terre.\"",
+                voice2Bio: "Née au milieu des rizières infinies du Sud, Diep Chi a trouvé la beauté dans le quotidien. Son art a évolué des croquis d'enfance dans la boue à une narration visuelle sophistiquée.",
+                voice2Loc: "Sud du Vietnam",
+                voice2Focus: "Arts Visuels",
+                impactLabel: "06 — Notre Impact",
+                impactMetric1: "Groupes Ethniques Vietnamiens",
+                impactMetric2: "Livraison de Contenu",
+                impactMetric3: "Passion & Dévouement",
+                expLabel: "07 — Expérience Interactive",
+                expTitle1: "Découvrez le Vietnam",
+                expTitle2: "Par le Jeu",
+                expDesc: "Immergez-vous dans l'\"Expérience Aether\" — un voyage numérique où vous découvrez des cultures cachées, collectionnez des artefacts rares et débloquez l'essence des destinations vietnamiennes grâce à des mini-jeux captivants.",
+                expBtn: "Entrer dans la Simulation",
+                liveDemo: "Démo en Direct",
+                gameTitle: "La Quête Aether",
+                connectBig: "Connecter",
+                joinCommunity: "Rejoindre la Communauté",
+                copyright: "Aether © 2026. Tous droits réservés. <br> Conçu pour la Préservation."
+            },
+            es: {
+                clickEnter: "Haga Clic para Entrar",
+                navManifesto: "Manifiesto",
+                navJourney: "Viaje",
+                navGallery: "Galería",
+                navExperience: "Experiencia",
+                heroSub: "Mapeando el Camino",
+                heroScroll: "Desplazar para Comenzar",
+                manifestoTitle: "01 — Manifiesto",
+                manifestoText: "Nuestro viaje comenzó con una simple creencia: que las culturas son tesoros vivos, y una vez perdidas, nunca pueden ser reemplazadas verdaderamente. En un mundo que se mueve más rápido que nunca, muchas comunidades indígenas y menos conocidas se desvanecen en el silencio no porque carezcan de valor, sino porque carecen de visibilidad. Sobre estos valores como base, documentamos culturas en videos de alta calidad.",
+                parallaxText: "Explorando<br>Culturas",
+                journeyVan: "La Furgoneta Camper",
+                journeyTitle1: "Conservación",
+                journeyDesc1: "Documentar historias no es suficiente. Construimos archivos vivos que las comunidades locales pueden usar para enseñar a la próxima generación.",
+                journeyTitle2: "Exploración",
+                journeyDesc2: "La curiosidad es nuestro combustible. Viajamos a los rincones remotos del mundo para encontrar las chispas de cultura que quedan.",
+                journeyTitle3: "Sostenibilidad",
+                journeyDesc3: "El camino debe ser ligero. Nuestro viaje respeta la tierra y a las personas, dejando atrás solo inspiración.",
+                artifactsTitle: "Descubriendo<br>Historia",
+                artifact1: "Textiles Antiguos",
+                artifact2: "La Alegría de la Cultura",
+                galleryLabel: "03 — Notas de Campo",
+                galleryTitle: "Memoria <br> Abstracta",
+                galleryDesc: "Un mapa no lineal de la experiencia humana. Siguiendo los hilos invisibles que nos conectan a todos.",
+                galleryItem1: "Tejedores de Seda",
+                galleryItem2: "Canciones Locales",
+                galleryItem3: "Marionetas de Agua",
+                galleryItem4: "Pagodas",
+                galleryItem5: "Festival de los Faroles",
+                galleryItem6: "Minorías Culturales",
+                galleryItem7: "Vistas de la Bahía",
+                galleryQuote: "\"Mapear una cultura es mapear las estrellas. Todo está conectado.\"",
+                valuesLabel: "04 — Principios Básicos",
+                valCulture: "Cultura",
+                valCultureDesc: "El latido del corazón de una comunidad, expresado a través del ritual y el arte. Define quiénes somos.",
+                valPreservation: "Preservación",
+                valPreservationDesc: "Salvaguardar lo intangible antes de que se desvanezca en el silencio. Cada historia cuenta.",
+                valAether: "Aether",
+                valAetherDesc: "Nuestra marca, pasión y trabajo.",
+                valHistory: "Historia",
+                valHistoryDesc: "Aprender del pasado para navegar el futuro. La sabiduría es una herencia.",
+                valFuture: "Futuro",
+                valFutureDesc: "Construyendo un puente para que la próxima generación camine con orgullo.",
+                valNature: "Naturaleza",
+                valNatureDesc: "Respetando la tierra que da forma a la cultura. Somos administradores de la tierra.",
+                voicesLabel: "05 — Las Voces",
+                voice1Name: "Ngoc Phan",
+                clickReveal: "Haga clic para revelar historia",
+                voice1Quote: "\"Archivar es recordar quiénes somos.\"",
+                voice1Bio: "Creciendo en las calles de Hanói en rápida modernización, Phan sintió una desconexión de su herencia. Se volcó al trabajo de archivo no solo para organizar la historia, sino para encontrar sus propias raíces.",
+                locationLabel: "Ubicación",
+                focusLabel: "Enfoque",
+                voice1Loc: "Hanói, Vietnam",
+                voice1Focus: "Archivo Cultural",
+                voice2Name: "Diep Chi",
+                voice2Quote: "\"El arte es la memoria de la tierra.\"",
+                voice2Bio: "Nacida entre los interminables arrozales del sur, Diep Chi encontró belleza en lo cotidiano. Su arte evolucionó desde bocetos infantiles en el barro hasta una narración visual sofisticada.",
+                voice2Loc: "Sur de Vietnam",
+                voice2Focus: "Artes Visuales",
+                impactLabel: "06 — Nuestro Impacto",
+                impactMetric1: "Grupos Étnicos Vietnamitas",
+                impactMetric2: "Entrega de Contenido",
+                impactMetric3: "Pasión y Dedicación",
+                expLabel: "07 — Experiencia Interactiva",
+                expTitle1: "Descubre Vietnam",
+                expTitle2: "A Través del Juego",
+                expDesc: "Sumérgete en la \"Experiencia Aether\" — un viaje digital donde descubres culturas ocultas, recolectas artefactos raros y desbloqueas la esencia de los destinos vietnamitas a través de minijuegos atractivos.",
+                expBtn: "Entrar en la Simulación",
+                liveDemo: "Demo en Vivo",
+                gameTitle: "La Búsqueda Aether",
+                connectBig: "Conectar",
+                joinCommunity: "Únete a la Comunidad",
+                copyright: "Aether © 2026. Todos los derechos reservados. <br> Diseñado para la Preservación."
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             // ROBUST LOADER & AUDIO LOGIC
             let loadingProgress = 0; 
@@ -1140,6 +1659,95 @@
             const bgMusic = document.getElementById('bg-music');
             const soundBtn = document.getElementById('sound-toggle');
             const loaderTitleText = document.getElementById('loader-title-text');
+
+            // --- MULTI-LANGUAGE LOGIC ---
+            let currentLang = 'en';
+            
+            // Function to set language and update DOM
+            function setLanguage(lang) {
+                if (!translations[lang]) return;
+                currentLang = lang;
+                document.body.setAttribute('data-lang', lang);
+
+                // Update standard i18n text elements
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+                
+                // Update Typewriter Elements (Values Section)
+                document.querySelectorAll('.typewriter-text').forEach(el => {
+                    const key = el.getAttribute('data-i18n-typewriter');
+                    if (translations[lang][key]) {
+                        el.setAttribute('data-text', translations[lang][key]);
+                        // If visible, update immediately without animation to prevent breaking layout
+                        if (el.innerText.length > 0) {
+                            el.innerText = translations[lang][key];
+                        }
+                    }
+                });
+
+                // REBUILD MANIFESTO ANIMATION
+                // This is critical for the scroll effect to work with new text lengths/splits
+                const manifestoContainer = document.getElementById('manifesto-container');
+                if (manifestoContainer) {
+                    const text = translations[lang].manifestoText;
+                    
+                    // Kill existing ScrollTrigger for manifesto if exists
+                    const oldTriggers = ScrollTrigger.getAll();
+                    oldTriggers.forEach(t => {
+                        if(t.vars.trigger === ".manifesto-section" || t.trigger === ".manifesto-section") {
+                            t.kill();
+                        }
+                    });
+
+                    // Clear and Rebuild DOM
+                    manifestoContainer.innerHTML = "";
+                    
+                    // Chinese splitting logic (char by char) vs Latin (word by word)
+                    const delimiter = (lang === 'zh') ? '' : ' '; 
+                    const words = text.split(delimiter);
+                    
+                    words.forEach(word => {
+                        const span = document.createElement("span");
+                        span.innerText = word + (lang === 'zh' ? '' : ' '); 
+                        span.className = "manifesto-word"; 
+                        manifestoContainer.appendChild(span);
+                    });
+
+                    // If site animations have initialized, we need to rebuild the tween
+                    if (!document.body.classList.contains('loading')) {
+                        // Re-run the matchMedia logic for manifesto
+                         ScrollTrigger.refresh();
+                         initManifestoAnimation();
+                    }
+                }
+
+                // Update Active State on Buttons
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    if (btn.getAttribute('data-lang-code') === lang) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            // Language Switcher Event Listeners
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Prevent bubbling if inside a link/button area
+                    e.stopPropagation();
+                    const lang = btn.getAttribute('data-lang-code');
+                    setLanguage(lang);
+                });
+            });
+
+            // Initialize default language
+            setLanguage('en');
+
 
             // --- AUDIO LOGIC ---
             bgMusic.load();
@@ -1188,7 +1796,7 @@
 
             // HOVER EFFECTS INITIALIZATION
             const applyHoverEffects = () => {
-                const hoverables = document.querySelectorAll('.hoverable, a, button');
+                const hoverables = document.querySelectorAll('.hoverable, a, button, .lang-btn');
                 hoverables.forEach(el => {
                     el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
                     el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
@@ -1392,6 +2000,38 @@
             });
         }
 
+        // Helper to init/re-init manifesto animation specifically
+        function initManifestoAnimation() {
+            // GSAP MATCH MEDIA: Different Logic for Laptop vs Mobile
+            ScrollTrigger.matchMedia({
+                // LAPTOP / DESKTOP (> 768px)
+                "(min-width: 769px)": function() {
+                    const tl = gsap.timeline({
+                        scrollTrigger: {
+                            trigger: ".manifesto-section",
+                            start: "top top",
+                            end: "+=1500",
+                            pin: true,
+                            scrub: 1,
+                        }
+                    });
+                    tl.to(".manifesto-word", { opacity: 1, y: 0, color: "#FFFFFF", stagger: 0.1, ease: "none" });
+                },
+                // MOBILE
+                "(max-width: 768px)": function() {
+                     gsap.to(".manifesto-word", {
+                        opacity: 1, y: 0, color: "#FFFFFF", stagger: 0.05, ease: "none",
+                        scrollTrigger: {
+                            trigger: ".manifesto-section",
+                            start: "top 70%",
+                            end: "bottom 70%",
+                            scrub: 1
+                        }
+                    });
+                }
+            });
+        }
+
         function initSiteAnimations() {
             gsap.registerPlugin(ScrollTrigger);
 
@@ -1414,38 +2054,14 @@
             gsap.from("#hero-title", { opacity: 0, y: 100, duration: 2, ease: "expo.out", delay: 0.5 });
             gsap.from("#hero-sub", { opacity: 0, letterSpacing: "0em", duration: 2, ease: "expo.out", delay: 0.8 });
             
-            // MANIFESTO SCROLL REVEAL (FONT CHANGE REMOVED)
-            const manifestoContainer = document.getElementById('manifesto-container');
-            const text = manifestoContainer.innerText;
-            const words = text.split(" ");
-            
-            manifestoContainer.innerHTML = "";
-            
-            words.forEach(word => {
-                const span = document.createElement("span");
-                span.innerText = word + " "; 
-                // All words get the same class now
-                span.className = "manifesto-word"; 
-                manifestoContainer.appendChild(span);
-            });
+            // Init Manifesto Animation for the first time
+            initManifestoAnimation();
             
             // GSAP MATCH MEDIA: Different Logic for Laptop vs Mobile
             ScrollTrigger.matchMedia({
                 
                 // LAPTOP / DESKTOP (> 768px)
                 "(min-width: 769px)": function() {
-                    // Pinned Manifesto
-                    const tl = gsap.timeline({
-                        scrollTrigger: {
-                            trigger: ".manifesto-section",
-                            start: "top top",
-                            end: "+=1500",
-                            pin: true,
-                            scrub: 1,
-                        }
-                    });
-                    tl.to(".manifesto-word", { opacity: 1, y: 0, color: "#FFFFFF", stagger: 0.1, ease: "none" });
-                    
                     // Uncovering History Zoom Effect (Artifacts)
                     gsap.fromTo(".zoom-container",
                         { scale: 3 }, // Start zoomed in
@@ -1635,17 +2251,6 @@
 
                 // MOBILE (< 768px)
                 "(max-width: 768px)": function() {
-                    // Simple Fade In for Manifesto (No Pinning)
-                    gsap.to(".manifesto-word", {
-                        opacity: 1, y: 0, color: "#FFFFFF", stagger: 0.05, ease: "none",
-                        scrollTrigger: {
-                            trigger: ".manifesto-section",
-                            start: "top 70%",
-                            end: "bottom 70%",
-                            scrub: 1
-                        }
-                    });
-
                     // No Horizontal Scroll - Items are stacked via CSS, just animate entrance
                     gsap.utils.toArray('.horizontal-track > div').forEach(item => {
                          gsap.from(item, {
